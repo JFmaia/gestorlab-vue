@@ -4,6 +4,8 @@ import { useLoadingStore } from '@/stores/loading';
 import { userStore } from '@/stores/user';
 
 const HomeViewVue = () => import('@/views/home/HomeView.vue');
+const SendEmail = () => import('@/views/passwordRecovery/SendMenssage.vue');
+const PasswordRecovery = () => import('@/views/passwordRecovery/PasswordRecovery.vue');
 const PageAcess = () => import('@/views/pageAcess/PageAcess.vue');
 const DashBoard = () => import('@/views/dashboard/DashBoard.vue');
 const PedidosAcess = () => import('@/views/dashboard/components/PedidosAcess.vue');
@@ -27,6 +29,17 @@ const routes = [
     path: '/pageAcess',
     name: 'page-acess',
     component: PageAcess,
+  },
+  {
+    path: '/sendEmail',
+    name: 'send-email',
+    component: SendEmail,
+  },
+  {
+    path: '/passwordRecovery/:id',
+    name: 'password-recovery',
+    component: PasswordRecovery,
+    props: true
   },
   {
     path: '/dashboard',
