@@ -3,38 +3,54 @@ import {userStore} from '@/stores/user';
 import {ref} from 'vue';
 import { QSpinnerDots, QIcon } from 'quasar';
 import { useRouter, useRoute } from 'vue-router';
+import { useForm } from 'vee-validate';
+import * as yup from 'yup';
 //router
 const route = useRoute();
 const router = useRouter();
+
 //state
 const user = userStore();
 
+//Validator
+const { errors, validate, defineField } = useForm({
+  validationSchema: yup.object({
+    password: yup.string().min(4, 'A senha deve ter no mínimo 4 caracteres').required('A senha é obrigatória'),
+    confPassword: yup.string()
+      .required('A confirmação da senha é obrigatória')
+      .min(4, 'A confirmação da senha deve ter no mínimo 4 caracteres')
+      .oneOf([yup.ref('password')], 'As senhas devem ser iguais')
+  }),
+});
+
+const [password, paswordAttrs] = defineField('password');
+const [confPassword, confPasswordAttrs] = defineField('confPassword');
+
 //Variables
 const id = route.params.id;
-let password = ref<string>('');
-let confirmPassword = ref<string>('');
 let confirmVisible = ref<boolean>(true);
 let visible = ref<boolean>(true);
 let loading = ref<boolean>(false);
 
 // function
 async function setRecoveryPassword(){
-  loading.value = true;
-  const object = {
-    id_user: id,
-    senha: password.value
-  };
-  const response = await user.recoveryPassword(object);
-  if (response === true){
-    loading.value = false;
-    router.push('/pageAcess');
-    alert('Senha alterada com sucesso!');
-  } else {
-    loading.value = false;
-    alert('Erro ao alterar senha, tem novamente em alguns minutos!');
+  const isValid = await validate();
+  if(isValid.valid){
+    loading.value = true;
+    const object = {
+      id_user: id,
+      senha: password.value
+    };
+    const response = await user.recoveryPassword(object);
+    if (response === true){
+      loading.value = false;
+      router.push('/pageAcess');
+      alert('Senha alterada com sucesso!');
+    } else {
+      loading.value = false;
+      alert('Erro ao alterar senha, tem novamente em alguns minutos!');
+    }
   }
-  
-  
 }
 </script>
 <template>
@@ -48,12 +64,12 @@ async function setRecoveryPassword(){
           <div class="password-input">
             <input
               v-model="password"
+              v-bind="paswordAttrs"
               class="password"
               :type="visible ? 'password' : 'text'"
               placeholder="senha"
               id="senha"
               name="senha"
-              required
             >
             <span
               class="eye"
@@ -71,18 +87,19 @@ async function setRecoveryPassword(){
               />
             </span>
           </div>
+          <pre class="error">{{ errors.password }}</pre>
         </section>
         <section class="content">
           <label>Confirme a senha:</label>
           <div class="password-input">
             <input
-              v-model="confirmPassword"
+              v-model="confPassword"
+              v-bind="confPasswordAttrs"
               class="password"
               :type="confirmVisible? 'password' : 'text'"
               placeholder="confirme sua senha"
               id="confirm-senha"
               name="confirm-senha"
-              required
             >
             <span
               class="eye"
@@ -100,6 +117,7 @@ async function setRecoveryPassword(){
               />
             </span>
           </div>
+          <pre>{{ errors.confPassword }}</pre>
         </section>
       </div>
      
@@ -179,5 +197,29 @@ async function setRecoveryPassword(){
     flex-direction: column;
     gap: 0.2rem;
     align-items: flex-start;
+  }
+
+  pre {
+    color: $error;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 660px){
+    .container-recovery{
+      padding: 2rem;
+    }
+    form {
+      font-size: 0.7rem;
+      padding: 1rem;
+      gap: 1rem;
+    }
+
+    p{
+      font-size: 1rem;
+    }
+
+    pre{
+      font-size: 0.6rem;
+    }
   }
 </style>
