@@ -133,6 +133,28 @@ export const userStore = defineStore('user', {
     },
     clearUser() {
       localStorage.removeItem('user');
-    }
+    },
+    async recoveryPassword(object: any) {
+      try {
+        await API.post('/usuarios/passwordRecovery', {
+          id_user: object.id_user,
+          senha: object.senha
+        });
+        return true;
+      } catch (error: any) {
+        return false;
+      }
+    },
+    async sendEmailPasswordRecovery(email: string) {
+      try {
+        await API.post('/usuarios/sendEmail', {
+          email: email
+        });
+        return true;
+      } catch (error: any) {
+        return false;
+      }
+    },
+
   },
 }); 
