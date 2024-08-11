@@ -13,7 +13,6 @@ let title = ref<any>();
 //function
 onMounted(() => {
   lab.value = user.getlaboratory;
-  console.log(lab.value);
 });
 </script>
 <template>
