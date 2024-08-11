@@ -95,6 +95,7 @@ async function createLab(){
   };
   const response = await lab.createLaboratorio(object, auth.getToken);
   if(response === true){
+    await user.setNewValueAndPrimaryAcess(false);
     loading.value=false;
     router.push('/dashboard');
   }else {
