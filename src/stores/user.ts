@@ -2,10 +2,11 @@ import { defineStore } from 'pinia';
 import API from '@/services/index';
 import { pendingStore } from '@/stores/pending';
 import { toRaw } from 'vue';
+import type { UsuarioResponse } from '@/types';
 
 export const userStore = defineStore('user', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user') || 'null') as Object | null,
+    user: JSON.parse(localStorage.getItem('user') || 'null') as UsuarioResponse,
     laboratorys: JSON.parse(localStorage.getItem('laboratorys') || 'null') as any | null,
     laboratory: JSON.parse(localStorage.getItem('laboratory') || 'null') as any | null,
   }),
@@ -23,6 +24,9 @@ export const userStore = defineStore('user', {
   },
 
   actions: {
+    async setNewValueAndPrimaryAcess(value: boolean) {
+      this.user.primeiro_acesso = value;
+    },
     async setInviteForLab(object: any) {
       try {
         const response = await API.post('/usuarios/requestAcessLab', {
