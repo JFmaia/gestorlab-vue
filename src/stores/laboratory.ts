@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import API from '@/services/index';
+import type { CreateLaboratory } from '@/types';
 
 export const labStore = defineStore('lab', {
   actions: {
@@ -21,6 +22,25 @@ export const labStore = defineStore('lab', {
         }
       } catch (error) {
         return error;
+      }
+    },
+    async createLaboratorio(lab: CreateLaboratory, token: string) {
+      try {
+        await API.post('/laboratorios', {
+          nome: lab.nome,
+          sobre: lab.sobre,
+          template: lab.template,
+          descricao: lab.descricao,
+          email: lab.email,
+          image: lab.image
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error: any) {
+        return error.response.data.detail;
       }
     }
   }
