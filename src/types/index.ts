@@ -20,5 +20,5 @@ export interface CreateLaboratory {
   template: number;
   descricao: string;
   email: string;
-  image: string;
+  image: string | null;
 }
