@@ -1,25 +1,51 @@
 <script setup lang="ts">
-import {QIcon} from 'quasar';
+import {QIcon, QSpinnerDots} from 'quasar';
 import {ref} from 'vue';
-import type { CreateLaboratory } from '@/types';
+import { useForm } from 'vee-validate';
+import * as yup from 'yup';
+import type {Imagefile, CreateLaboratory} from '@/types';
+import {labStore} from '@/stores/laboratory';
+import {authStore} from '@/stores/auth';
+import {userStore} from '@/stores/user';
+import {useRouter} from 'vue-router';
 
+// state
+const lab = labStore();
+const auth = authStore();
+//Router
+const router = useRouter();
+const user = userStore();
 //Variables
 let stepI = ref<Boolean>(true);
 let stepII = ref<Boolean>(false);
 let stepIII = ref<Boolean>(false);
+let optionTemplate = ref<Boolean>(false);
+let loading = ref<Boolean>(false);
+let selectedImage = ref<Imagefile | null>(null);
+let imageBase64 = ref<string | null>(null);
+let fileInput = ref<HTMLInputElement | null>(null); // Adicionando o tipo aqui
 
-let newLaboratory = ref<CreateLaboratory>({
-  nome: '',
-  sobre: '',
-  template: 0,
-  descricao: '',
-  email: '',
-  image: ''
+
+//Validator
+const { errors, defineField, validateField } = useForm({
+  validationSchema: yup.object({
+    nome: yup.string().required('O nome é obrigatória!'),
+    descricao: yup.string().required('Por favor descreva um pouco o seu laboratório!'),
+    sobre: yup.string().required('Por favor fale um pouco sobre o seu laboratório!'),
+    template: yup.number().required('Por favor escolha uma das opções de template!'),
+    email: yup.string().email('Este e-mail não é valido!').required('Por favor digite seu e-mail!'),
+  }),
 });
+
+const [nome, nomeAttrs] = defineField('nome');
+const [sobre, sobreAttrs] = defineField('sobre');
+const [template, templateAttrs] = defineField('template');
+const [descricao, descricaoAttrs] = defineField('descricao');
+const [email, emailAttrs] = defineField('email');
 
 //Functions
 
-function nextStep(option: number){
+async function nextStep(option: number){
   switch (option) {
   case 1:
     stepI.value = true;
@@ -27,14 +53,18 @@ function nextStep(option: number){
     stepIII.value = false;
     break;
   case 2:
-    stepI.value = false;
-    stepII.value = true;
-    stepIII.value = false;
+    if((await validateField('nome')).valid){  
+      stepI.value = false;
+      stepII.value = true;
+      stepIII.value = false;
+    }
     break;
   case 3:
-    stepI.value = false;
-    stepII.value = false;
-    stepIII.value = true;
+    if((await validateField('email')).valid && (await validateField('descricao')).valid && (await validateField('sobre')).valid){
+      stepI.value = false;
+      stepII.value = false;
+      stepIII.value = true;
+    }
     break;
   default:
     stepI.value = true;
@@ -44,6 +74,56 @@ function nextStep(option: number){
   }
 }
 
+function handleTemplate(value: boolean){
+  optionTemplate.value = value;
+  if(value){
+    template.value = 1;
+  }else {
+    template.value = 2;
+  }
+}
+
+async function createLab(){
+  loading.value=true;
+  const object: CreateLaboratory = {
+    nome:nome.value,
+    sobre:sobre.value,
+    template: template.value,
+    descricao:descricao.value,
+    email:email.value,
+    image:imageBase64.value 
+  };
+  const response = await lab.createLaboratorio(object, auth.getToken);
+  if(response === true){
+    loading.value=false;
+    router.push('/dashboard');
+  }else {
+    loading.value=false;
+    alert(response);
+  }
+}
+
+function logoutLab(){
+  auth.logout();
+  user.clearUser;
+  router.push('/pageAcess');
+}
+
+function onImageChange(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const file = target.files?.[0];
+
+  if (!file) return;
+
+  selectedImage.value = file;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    imageBase64.value = event.target?.result as string;
+  };
+  reader.readAsDataURL(file);
+}
+
 </script>
 <template>
   <div class="createLab-container">
@@ -51,7 +131,7 @@ function nextStep(option: number){
       <header>
         <QIcon
           class="icon"
-          @click="()=>{}"
+          @click="logoutLab()"
           name="undo"
           size="2rem"
           color="primary"
@@ -73,11 +153,11 @@ function nextStep(option: number){
         class="step"
       >
         <button
-          @click="()=>{}"
+          @click="fileInput?.click()"
           class="button-img"
         >
           <QIcon
-            v-if="newLaboratory.image === ''"
+            v-if="imageBase64 === null"
             name="add_a_photo"
             size="4rem"
             color="white"
@@ -85,16 +165,25 @@ function nextStep(option: number){
           />
           <img
             v-else
-            :src="newLaboratory.image"
+            :src="imageBase64"
             alt="Imagem que foi escolhida"
+          >
+          <input 
+            ref="fileInput" 
+            type="file" 
+            style="display: none;" 
+            @change="onImageChange" 
           >
         </button>
         <div class="content">
           <label>Laboratório:</label>
           <input
+            v-model="nome"
+            v-bind="nomeAttrs"
             type="text"
             placeholder="digite aqui a sígla do seu laboratório"
           >
+          <pre>{{ errors.nome }}</pre>
         </div>
         <div class="footer">
           <div />
@@ -110,17 +199,103 @@ function nextStep(option: number){
       <div
         v-show="stepII"
         class="step"
-      />
+      >
+        <div class="box-inputs">
+          <div class="content">
+            <label>E-mail:</label>
+            <input
+              v-model="email"
+              v-bind="emailAttrs"
+              type="text"
+              placeholder="Digite aqui o email do seu laboratório"
+            >
+            <pre>{{ errors.email }}</pre>
+          </div>
+          <div class="content">
+            <label>Descrição:</label>
+            <textarea
+              v-model="descricao"
+              v-bind="descricaoAttrs"
+              type="text"
+              placeholder="Descreva seu laboratório!"
+            />
+            <pre>{{ errors.descricao }}</pre>
+          </div>
+          <div class="content">
+            <label>Sobre:</label>
+            <textarea
+              v-model="sobre"
+              v-bind="sobreAttrs"
+              type="text"
+              placeholder="Fale sobre seu laboratório!"
+            />
+            <pre>{{ errors.sobre }}</pre>
+          </div>
+        </div>
+        
+        <div class="footer">
+          <button @click="nextStep(1)">
+            <QIcon
+              name="chevron_left"
+              size="1.2rem"
+            />
+            <span>Voltar</span>
+          </button>
+          <button @click="nextStep(3)">
+            <span>Proximo</span>
+            <QIcon
+              name="chevron_right"
+              size="1.2rem"
+            />
+          </button>
+        </div>
+      </div>
       <div
         v-show="stepIII"
         class="step"
-      />
+      >
+        <div class="box-template">
+          <button
+            v-bind="templateAttrs"
+            :class="optionTemplate === false ? 'button-template' : 'button-template-active'"
+            @click="handleTemplate(!optionTemplate)"
+          >
+            <span>Template 1</span>
+          </button>
+          <button
+            v-bind="templateAttrs"
+            :class="optionTemplate === true ? 'button-template' : 'button-template-active'"
+            @click="handleTemplate(!optionTemplate)"
+          >
+            <span>Template 2</span>
+          </button>
+        </div>
+        <pre>{{ errors.template }}</pre>
+        <div class="footer">
+          <button @click="nextStep(2)">
+            <QIcon
+              name="chevron_left"
+              size="1.2rem"
+            />
+            <span>Voltar</span>
+          </button>
+          <button @click="createLab()">
+            <QSpinnerDots
+              v-if="loading"
+              color="dark"
+              size="1.2rem"
+            />
+            <span v-else>Criar Laboratório</span>
+          </button>
+        </div>
+      </div>
     </section>
   </div>
 </template>
 
 <style scoped lang="scss">
   section{
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 5rem;
@@ -140,13 +315,19 @@ function nextStep(option: number){
   }
 
   img{
+    background-size: cover;
     border-radius: 50%;
     border: 1px solid $contour;
     width: 20rem;
     height: 20rem;
   }
 
-  input, select {
+  pre{
+    font-size: 0.8rem;
+    color: $error;
+  }
+
+  input, select, textarea {
     width: 100%;
     color: $textColor;
     padding: 12px 16px;
@@ -175,6 +356,7 @@ function nextStep(option: number){
     align-items: center;
     justify-content: center;
   }
+  
   .icon {
     cursor: pointer;
   }
@@ -202,12 +384,20 @@ function nextStep(option: number){
   }
 
   .step {
-    height: 100%;
+    justify-content: space-between;
+    height: 100%; 
     display: flex;
     flex-direction: column;
     gap:4rem;
     align-items: center;
-    justify-content: space-between;
+  }
+
+  .box-inputs{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap:0.8rem;
+    align-items: center;
   }
 
   .content{
@@ -233,6 +423,7 @@ function nextStep(option: number){
     gap:0.2rem;
   }
   .footer button {
+    margin-bottom: 40px; 
     background-color: $secondary;
     border-radius: 1rem;
     padding: 0.8rem 1rem;
@@ -243,5 +434,44 @@ function nextStep(option: number){
     justify-content: center;
     align-items: center;
     gap:0.2rem;
+  }
+
+  .box-template{
+    width: 100%;
+    gap: 2rem;
+    height: 100%;
+    justify-content: center;
+    display: flex;
+    align-items: center
+  }
+
+  .button-template{
+    border: 1px solid $secondary;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
+    background-color: $primary;
+    color: $secondary;
+    border-radius: 1rem;
+    padding: 2rem;
+    height: 180px;
+    width: 240px;
+  }
+
+  .button-template-active{
+    border: 1px solid $secondary;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    cursor: pointer;
+    background-color: $secondary;
+    color: $dark;
+    align-items: center;
+    border-radius: 1rem;
+    padding: 2rem;
+    height: 180px;
+    width: 240px;
   }
 </style>
