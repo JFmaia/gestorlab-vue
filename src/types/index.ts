@@ -21,6 +21,7 @@ export interface CreateLaboratory {
   descricao: string;
   email: string;
   image: string | null;
+  endereco: CreateEndereco
 }
 
 export interface Pending {
@@ -32,6 +33,31 @@ export interface Pending {
   data_create: string | null;
   data_atualizacao: string | null;
   matricula_user: string | null;
+}
+
+export interface Endereco {
+  id: string;
+  logradouro: string;
+  numero: number;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: number;
+  pais: string;
+  data_inicial: string;
+  data_up: string;
+}
+
+export interface CreateEndereco {
+  logradouro: string;
+  numero: number;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: number;
+  pais: string;
 }
 
 export interface UsuarioResponse {
