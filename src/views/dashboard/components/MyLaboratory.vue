@@ -1,24 +1,25 @@
 <script setup lang="ts">
 import {userStore} from '@/stores/user';
 import {ref, onMounted} from 'vue';
-import { QCard,  QInput } from 'quasar';
+import { QCard, QIcon } from 'quasar';
+import type { Laboratorio } from '@/types';
 
 // State
 const user = userStore();
 
 //variables
-let lab = ref<any>();
-let title = ref<any>();
+let lab = ref<Laboratorio | null>();
 
 //function
 onMounted(() => {
   lab.value = user.getlaboratory;
+  console.log(lab.value);
 });
 </script>
 <template>
   <div
     class="info-container"
-    v-if="lab === null || lab === 'null'"
+    v-if="lab === null"
   >
     <p>Você não faz parte de nenhum laboratório!</p>
   </div>
@@ -27,19 +28,28 @@ onMounted(() => {
     v-else
   >
     <section class="profile-lab">
-      <img
-        class="img-avatar"
-        v-if="lab && lab.image"
-        :src="`${lab?.image}`"
-        alt="Imagem do Laboratorio"
-      >
-      <q-input
-        outlined
-        color="grey"
-        class="q-input"
-        v-model="title"
-        label="Nome do laboratorio"
-      />
+      <div class="box-profile">
+        <img
+          class="img-avatar"
+          v-if="lab && lab.image"
+          :src="`${lab?.image}`"
+          alt="Imagem do Laboratorio"
+        >
+        <div>
+          <h1>{{ lab?.nome }}</h1>
+          <p>{{ lab?.descricao }}</p>
+          <span @click="()=>{}">
+            <QIcon
+              name="groups"
+              size="1.2rem"
+            />
+            {{ lab?.membros?.length }}
+          </span>
+        </div>
+        <button @click="()=>{}">
+          Editar o laboratório
+        </button>
+      </div>
     </section>
     <section class="list-acess">
       <ul>
@@ -57,8 +67,8 @@ onMounted(() => {
   }
 
   .img-avatar {
-    width: 12rem;
-    height: 12rem;
+    width: 16rem;
+    height: 16rem;
     border-radius: 50%;
   }
 
@@ -86,12 +96,64 @@ onMounted(() => {
   }
 
   .profile-lab{
-    flex:2;
-    align-items: center;
+    flex:1;
   }
 
   .list-acess{
-    flex:1;
+    flex:3;
+  }
+
+  .box-profile{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .box-profile h1{
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .box-profile p {
+    font-size: 1.2rem;
+    font-weight: 500;
+    max-width: 400px;
+    line-height: 24px;
+  }
+
+  .box-profile div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .box-profile div span{
+    cursor: pointer;
+    display: flex;
+    gap: 0.2rem;
+    align-items: center;
+  }
+
+  .box-profile div span:hover{
+    color: $secondary;
+  }
+
+  .box-profile button {
+    cursor: pointer;
+    width: 100%;
+    padding: 0.8rem;
+    background-color: $primary;
+    border: 1px solid $contour;
+    border-radius: 0.8rem;
+    color: $textColor;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .box-profile button:hover {
+    background-color: $dark
   }
 
   ul {
