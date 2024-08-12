@@ -24,6 +24,18 @@ export interface CreateLaboratory {
   endereco: CreateEndereco
 }
 
+export interface Projeto {
+  id: string
+  titulo: string
+  descricao: string
+  lab_creator: string
+  image: string | null
+  autor_id: string
+  data_inicial: string
+  data_up: string
+  membros: Array<UsuarioResponse> | null
+}
+
 export interface Pending {
   id: string | null;
   id_user: string | null;
@@ -58,6 +70,26 @@ export interface CreateEndereco {
   estado: string;
   cep: number;
   pais: string;
+}
+
+export interface Laboratorio {
+  id: string;
+  coordenador_id: string;
+  nome: string;
+  sobre: string;
+  template: number;
+  descricao: string;
+  image: string | null;
+  email: string;
+  data_inicial: string;
+  data_up: string;
+  membros: Array<UsuarioResponse> | null;
+  projetos: Array<Projeto> | null;
+  lista_perm: Array<Permission> | null;
+  lista_acess: Array<Pending> | null;
+  endereco_id: string
+  endereco: Endereco,
+  check: boolean
 }
 
 export interface UsuarioResponse {
