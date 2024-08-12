@@ -2,13 +2,13 @@ import { defineStore } from 'pinia';
 import API from '@/services/index';
 import { pendingStore } from '@/stores/pending';
 import { toRaw } from 'vue';
-import type { UsuarioResponse } from '@/types';
+import type { UsuarioResponse, Laboratorio } from '@/types';
 
 export const userStore = defineStore('user', {
   state: () => ({
     user: JSON.parse(localStorage.getItem('user') || 'null') as UsuarioResponse,
-    laboratorys: JSON.parse(localStorage.getItem('laboratorys') || 'null') as any | null,
-    laboratory: JSON.parse(localStorage.getItem('laboratory') || 'null') as any | null,
+    laboratorys: JSON.parse(localStorage.getItem('laboratorys') || 'null') as Array<Laboratorio>,
+    laboratory: JSON.parse(localStorage.getItem('laboratory') || 'null') as Laboratorio,
   }),
 
   getters: {
@@ -72,8 +72,8 @@ export const userStore = defineStore('user', {
           localStorage.setItem('user', JSON.stringify(data));
           this.user = data;
           if (data.laboratorios.length === 0) {
-            localStorage.setItem('laboratorys', JSON.stringify(null));
-            this.laboratorys = null;
+            localStorage.setItem('laboratorys', JSON.stringify([]));
+            this.laboratorys = [];
           } else {
             const listAux = [
               ...data.laboratorios
@@ -103,8 +103,8 @@ export const userStore = defineStore('user', {
           localStorage.setItem('user', JSON.stringify(data));
           this.user = data;
           if (data.laboratorios.length === 0) {
-            localStorage.setItem('laboratorys', JSON.stringify(null));
-            this.laboratorys = null;
+            localStorage.setItem('laboratorys', JSON.stringify([]));
+            this.laboratorys = [];
           } else {
             const listAux = [
               ...data.laboratorios
