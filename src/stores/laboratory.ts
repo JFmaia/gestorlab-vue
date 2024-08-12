@@ -32,7 +32,10 @@ export const labStore = defineStore('lab', {
           template: lab.template,
           descricao: lab.descricao,
           email: lab.email,
-          image: lab.image
+          image: lab.image,
+          endereco: {
+            ...lab.endereco
+          }
         }, {
           headers: {
             Authorization: `Bearer ${token}`,
