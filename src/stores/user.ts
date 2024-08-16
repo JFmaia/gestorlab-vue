@@ -2,13 +2,13 @@ import { defineStore } from 'pinia';
 import API from '@/services/index';
 import { pendingStore } from '@/stores/pending';
 import { toRaw } from 'vue';
-import type { UsuarioResponse, Laboratorio } from '@/types';
+import type { UsuarioResponse, LaboratorioResponse } from '@/types';
 
 export const userStore = defineStore('user', {
   state: () => ({
-    user: JSON.parse(localStorage.getItem('user') || 'null') as UsuarioResponse,
-    laboratorys: JSON.parse(localStorage.getItem('laboratorys') || 'null') as Array<Laboratorio>,
-    laboratory: JSON.parse(localStorage.getItem('laboratory') || 'null') as Laboratorio,
+    user: JSON.parse(localStorage.getItem('user') || '{}') as UsuarioResponse,
+    laboratorys: JSON.parse(localStorage.getItem('laboratorys') || '[]') as Array<LaboratorioResponse>,
+    laboratory: JSON.parse(localStorage.getItem('laboratory') || '{}') as LaboratorioResponse,
   }),
 
   getters: {
@@ -19,11 +19,34 @@ export const userStore = defineStore('user', {
       return toRaw(state.laboratorys);
     },
     getlaboratory(state) {
-      return toRaw(state.laboratory);
+      if (Object.keys(state.laboratory).length === 0) {
+        return null;
+      } else {
+        return toRaw(state.laboratory);
+      }
+
     }
   },
 
   actions: {
+    async updateLaboratorio(id: string, token: string) {
+      const response = await API.get(`/laboratorios/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const lab: LaboratorioResponse = {
+        ...response.data,
+        check: true
+      };
+
+      this.laboratory = lab;
+      localStorage.setItem('laboratory', JSON.stringify(this.laboratory));
+    },
+    getPedidosAtivos() {
+      const list = this.laboratory.pedidos?.filter((item) => item.ativo === true);
+      return list;
+    },
     async setNewValueAndPrimaryAcess(value: boolean) {
       this.user.primeiro_acesso = value;
     },
@@ -56,7 +79,7 @@ export const userStore = defineStore('user', {
     },
     async setUser(token: string) {
       try {
-        if (this.laboratory === null) {
+        if (this.laboratory && Object.keys(this.laboratory).length === 0) {
           const response = await API.get('/usuarios/logado', {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -65,22 +88,19 @@ export const userStore = defineStore('user', {
           const userData = response.data;
 
           const usuario = await API.get(`/usuarios/${userData.id}`);
-
-          const data = {
-            ...usuario.data
-          };
+          const data = { ...usuario.data };
           localStorage.setItem('user', JSON.stringify(data));
           this.user = data;
+
           if (data.laboratorios.length === 0) {
             localStorage.setItem('laboratorys', JSON.stringify([]));
             this.laboratorys = [];
+            this.laboratory = {} as LaboratorioResponse;
           } else {
-            const listAux = [
-              ...data.laboratorios
-            ];
-            listAux.forEach((item) => {
-              item.check = false;
-            });
+            const listAux = data.laboratorios.map((item: LaboratorioResponse) => ({
+              ...item,
+              check: false
+            }));
             localStorage.setItem('laboratorys', JSON.stringify(listAux));
             this.laboratorys = listAux;
             listAux[0].check = true;
@@ -94,37 +114,37 @@ export const userStore = defineStore('user', {
             },
           });
           const userData = response.data;
-
           const usuario = await API.get(`/usuarios/${userData.id}`);
+          const data = { ...usuario.data };
 
-          const data = {
-            ...usuario.data
-          };
           localStorage.setItem('user', JSON.stringify(data));
           this.user = data;
+
           if (data.laboratorios.length === 0) {
             localStorage.setItem('laboratorys', JSON.stringify([]));
             this.laboratorys = [];
+            this.laboratory = {} as LaboratorioResponse; // Garantir que `this.laboratory` seja um objeto vazio
           } else {
-            const listAux = [
-              ...data.laboratorios
-            ];
-            listAux.forEach((item) => {
-              item.check = false;
-            });
-            listAux.forEach((item) => {
+            const listAux = data.laboratorios.map((item: LaboratorioResponse) => ({
+              ...item,
+              check: false
+            }));
+            listAux.forEach((item: LaboratorioResponse) => {
               if (item.id === this.laboratory.id) {
                 item.check = true;
               }
             });
+
             localStorage.setItem('laboratorys', JSON.stringify(listAux));
             this.laboratorys = listAux;
-            this.laboratory.check = true;
+            const labWithCheck = listAux.find((item: LaboratorioResponse) => item.check) || {} as LaboratorioResponse;
+            this.laboratory = labWithCheck;
+
             localStorage.setItem('laboratory', JSON.stringify(this.laboratory));
           }
         }
-      }
-      catch (err) {
+      } catch (err) {
+        console.error('Erro ao definir o usuário:', err);
         return err;
       }
     },
@@ -135,13 +155,12 @@ export const userStore = defineStore('user', {
           primeiro_nome: usuario.primeiro_nome,
           segundo_nome: usuario.segundo_nome,
           data_nascimento: usuario.data_nascimento,
-          genero: usuario.genero,
+          id_genero: usuario.id_genero,
           email: usuario.email,
           image: usuario.image,
           matricula: usuario.matricula,
           tel: usuario.tel,
           senha: usuario.senha,
-          list_permissoes: usuario.permissoes
         });
         const data = {
           ...response.data
@@ -153,11 +172,15 @@ export const userStore = defineStore('user', {
       }
     },
     clearUser() {
-      localStorage.setItem('laboratorys', JSON.stringify(null));
-      localStorage.setItem('laboratory', JSON.stringify(null));
+      // Remover os itens do localStorage
       localStorage.removeItem('user');
       localStorage.removeItem('laboratorys');
       localStorage.removeItem('laboratory');
+
+      // Limpar o estado do store
+      this.user = {} as UsuarioResponse;
+      this.laboratorys = [];
+      this.laboratory = {} as LaboratorioResponse;
     },
     async recoveryPassword(object: any) {
       try {

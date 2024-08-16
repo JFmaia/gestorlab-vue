@@ -4,6 +4,18 @@ import type { CreateLaboratory } from '@/types';
 
 export const labStore = defineStore('lab', {
   actions: {
+    async getLaboratory(id: any, token: string) {
+      try {
+        const response = await API.get(`/laboratorios/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return response.data;
+      } catch (error) {
+        return error;
+      }
+    },
     async getLaboratorys(id: string) {
       try {
         const response = await API.get('/laboratorios');
@@ -37,6 +49,46 @@ export const labStore = defineStore('lab', {
             ...lab.endereco
           }
         }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error: any) {
+        return error.response.data.detail;
+      }
+    },
+    async addMemberInLaboratorio(object: any, token: string) {
+      try {
+        await API.post('/laboratorios/addMember', {
+          perm_id: object.perm_id,
+          idLaboratorio: object.idLab,
+          idUser: object.idUser
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch (error: any) {
+        return error.response.data.detail;
+      }
+    },
+    async deleteAcessLab(idPend: string, token: string) {
+      try {
+        await API.put(`/pendentes/deletePending/${idPend}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error: any) {
+        return error.response.data.detail;
+      }
+
+    },
+    async deleteLaboratorio(id: string, token: string) {
+      try {
+        await API.delete(`/laboratorios/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
