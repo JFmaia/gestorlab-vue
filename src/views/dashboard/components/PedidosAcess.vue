@@ -4,14 +4,16 @@ import {pendingStore} from '@/stores/pending';
 import {permStore} from '@/stores/perm';
 import {authStore} from '@/stores/auth';
 import {onMounted, ref} from 'vue';
+import type { Pending, Permission } from '@/types';
 
 const pending = pendingStore();
 const perm = permStore();
 const auth = authStore();
 
-let listPending = ref<Array<any>>();
-let listPermissao = ref<Array<any>>();
+let listPending = ref<Array<Pending>>();
+let listPermissao = ref<Array<Permission>>();
 let loading = ref<Boolean>(false);
+let permition = ref<string>();
 
 // Quasar notificantion
 const q = useQuasar();
@@ -29,12 +31,12 @@ const initListPending = async() => {
   listPending.value = listaux;
 };
 
-async function realeseAcess(item:any, index: any){
+async function realeseAcess(item:Pending, index: any){
   loading.value = true;
   const object = {
     id: item.id,
     id_user: item.id_user,
-    perm: item.perm.id
+    id_perm: permition.value
   };
   const token = auth.getToken;
   const response = await pending.releaseAcessUser(object, token);
@@ -68,7 +70,7 @@ async function realeseAcess(item:any, index: any){
       >
         <q-card-section>
           <div class="text-h6">
-            {{ item.id_user }}
+            {{ `${item.usuario?.primeiro_nome}` + ' ' + `${item.usuario?.segundo_nome}` }}
           </div>
         </q-card-section>
 
@@ -81,15 +83,15 @@ async function realeseAcess(item:any, index: any){
             <div class="content-card">
               {{ item.data_create }}
               <select
-                id="genero"
-                name="genero"
+                id="permissions"
+                name="permissions"
                 required
-                v-model="item.perm"
+                v-model="permition"
               >
                 <option
                   v-for="permission in listPermissao"
                   :key="permission.id"
-                  :value="permission"
+                  :value="permission.id"
                 >
                   {{ permission.title }}
                 </option>

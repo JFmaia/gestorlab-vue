@@ -33,6 +33,7 @@ async function initComponent(){
         <MyCard
           v-for="item in listLaboratorys"
           :key="item"
+          :type="0"
           :id-user="userData.id"
           :id-lab="item.id"
           :title="item.nome"

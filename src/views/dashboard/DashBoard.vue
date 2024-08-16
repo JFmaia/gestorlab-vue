@@ -75,7 +75,7 @@ async function handlePermLab(value: any, id_user: string){
   if (value.length !== 0 && value !== null){
     let permList = await perm.getPermissionsLab();
     let permLab = value.find((item: any) => item.id_user === id_user);
-    let selectedPerm = permList.find((item: any) => item.id === permLab.perm_id);
+    let selectedPerm = permList.find((item: any) => item.id === permLab.id_perm);
     return selectedPerm.title;
   } else {
     return 'Membro';
@@ -87,16 +87,16 @@ async function getInitComponent() {
   listLaboratory.value = user.getlaboratorys;
   selectedLaboratory.value = user.getlaboratory;
   
-  if (userLocal.value.permissoes[0].title === 'Admin'){
+  if (userLocal.value.permissao.title === 'Admin'){
     openForPermition.value = 2;
     listMenu.value = chooseListMenu(openForPermition.value);
   } else {
-    if( listLaboratory.value!== null){
+    if(listLaboratory.value !== null && listLaboratory.value.length !== 0){
       if(selectedLaboratory.value.coordenador_id === userLocal.value.id){
         openForPermition.value = 1;
         listMenu.value = chooseListMenu(openForPermition.value);
       }else {
-        permUserLab.value = await handlePermLab(selectedLaboratory.value.lista_perm, userLocal.value.id);
+        permUserLab.value = await handlePermLab(selectedLaboratory.value.per, userLocal.value.id);
         switch (permUserLab.value) {
         case ('Supervisor'):
           openForPermition.value = 2;
@@ -116,7 +116,7 @@ async function getInitComponent() {
         }
       }
     }else{
-      switch (userLocal.value.permissoes[0].title) {
+      switch (userLocal.value.permissao.title) {
       case ('Coordenador'):
         openForPermition.value = 1;
         listMenu.value = chooseListMenu(openForPermition.value);
@@ -174,7 +174,7 @@ async function getInitComponent() {
               />
             </div>
             <q-menu
-              v-if="listLaboratory !== null && userLocal.permissoes[0].title !== 'Admin'"
+              v-if="listLaboratory !== null && listLaboratory.length !== 0 && userLocal.permissao.title !== 'Admin'"
             >
               <q-list style="min-width: 300px; background-color: #1F2026; border: 1px solid #333335">
                 <div class="menu-header">

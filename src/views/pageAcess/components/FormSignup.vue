@@ -84,7 +84,7 @@ async function signup(){
     primeiro_nome: primeiro_nome.value,
     segundo_nome: segundo_nome.value,
     data_nascimento: data_nascimento.value,
-    genero: selectGenero.value?.id,
+    id_genero: selectGenero.value?.id,
     email: email.value,
     image: imageBase64.value,
     matricula: removerCaracter(matricula.value),
