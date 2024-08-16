@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { authStore } from '@/stores/auth';
 import { useLoadingStore } from '@/stores/loading';
 import { userStore } from '@/stores/user';
+import type { UsuarioResponse } from '@/types';
 
 const HomeViewVue = () => import('@/views/home/HomeView.vue');
 const SendEmail = () => import('@/views/passwordRecovery/SendMenssage.vue');
@@ -11,14 +12,21 @@ const DashBoard = () => import('@/views/dashboard/DashBoard.vue');
 const PedidosAcess = () => import('@/views/dashboard/components/PedidosAcess.vue');
 const Profile = () => import('@/views/dashboard/components/MyProfile.vue');
 const Timeline = () => import('@/views/dashboard/components/timeline/TimeLine.vue');
-const Laboratory = () => import('@/views/dashboard/components/MyLaboratory.vue');
+const Laboratory = () => import('@/views/dashboard/components/laboratory/MyLaboratory.vue');
 const CreateLab = () => import('@/views/createLab/CreateLab.vue');
+const LandingPage = () => import('@/views/landingpage/LandingPageLab.vue');
 
 const routes = [
   {
     path: '/',
     name: 'home',
     component: HomeViewVue
+  },
+  {
+    path: '/landingpage/:id',
+    name: 'landingpage',
+    component: LandingPage,
+    props: true
   },
   {
     path: '/createLab',
@@ -82,8 +90,8 @@ router.beforeEach(async (to, from, next) => {
   const loadingStore = useLoadingStore();
   const user = userStore();
   function isCoordOrNot() {
-    const usuario: any = user.getUser;
-    if (usuario.permissoes[0].title === 'Coordenador') {
+    const usuario: UsuarioResponse = user.getUser;
+    if (usuario?.permissao?.title === 'Coordenador') {
       if (usuario.primeiro_acesso === true) {
         return true;
       } else {
