@@ -3,7 +3,10 @@ import { ref, onMounted } from 'vue';
 import { labStore } from '@/stores/laboratory';
 import { useRoute } from 'vue-router';
 import type { LaboratorioResponse } from '@/types';
+import { QSpinnerDots} from 'quasar';
 import { authStore } from '@/stores/auth';
+import TemplateOne from './components/TemplateOne.vue';
+import TemplateTwo from './components/TemplateTwo.vue';
 
 // Router
 const route = useRoute();
@@ -21,13 +24,30 @@ onMounted(async()=>{
 });
 </script>
 <template>
-  <div v-show="laboratory?.template === 1">
-    <h1>Template 1</h1>
+  <div v-if="laboratory">
+    <div v-show="laboratory?.template === 1">
+      <TemplateOne :lab="laboratory" />
+    </div>
+    <div v-show="laboratory?.template === 2">
+      <TemplateTwo :lab="laboratory" />
+    </div>
   </div>
-  <div v-show="laboratory?.template === 2">
-    <h1>Template 2</h1>
+  <div
+    class="loading"
+    v-else
+  >
+    <QSpinnerDots
+      size="20px"
+      color="primary"
+    />
   </div>
 </template>
-<style scoped lang="">
-  
+<style scoped lang="scss">
+  .loading{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 110%;
+  }
 </style>
