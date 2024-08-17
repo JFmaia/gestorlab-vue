@@ -37,7 +37,7 @@ onMounted(async()=>{
     v-else
   >
     <QSpinnerDots
-      size="20px"
+      size="2rem"
       color="primary"
     />
   </div>

@@ -33,22 +33,22 @@ function toggleBox() {
       </h2>
       <ul class="menu-header">
         <li>
-          <a href="#section4">
+          <a href="#sectionTwo4">
             Contatos
           </a>
         </li>
         <li>
-          <a href="#section1">
+          <a href="#sectionTwo1">
             Sobre
           </a>
         </li>
         <li v-show="lab?.membros !== null && lab?.membros?.length !== 0">
-          <a href="#section2">
+          <a href="#sectionTwo2">
             Membros
           </a>
         </li>
         <li v-show="lab?.projetos?.length !== 0 && lab?.projetos !== null">
-          <a href="#section3">
+          <a href="#sectionTwo3">
             Projetos
           </a>
         </li>
@@ -94,7 +94,7 @@ function toggleBox() {
   </div>
   <main>
     <section
-      id="hero"
+      id="heroTwo"
       class="container-template"
     >
       <div class="container template">
@@ -109,7 +109,7 @@ function toggleBox() {
       </div>
     </section>
     <section
-      id="section1"
+      id="sectionTwo1"
       class="container-about"
     >
       <div class="container about">
@@ -140,7 +140,7 @@ function toggleBox() {
       </div>
     </section>
     <section
-      id="section2"
+      id="sectionTwo2"
       v-show="lab?.membros?.length !== 0 && lab?.membros !== null"
       class="container-normal"
     >
@@ -170,7 +170,7 @@ function toggleBox() {
       </div>
     </section>
     <section
-      id="section3"
+      id="sectionTwo3"
       v-show="lab?.projetos?.length !== 0 && lab?.projetos !== null"
       class="container-normal"
     >
@@ -201,7 +201,7 @@ function toggleBox() {
     </section>
   </main>
   <footer
-    id="section4"
+    id="sectionTwo4"
     class="contaner-footer"
   >
     <div class="container footer-one">
@@ -248,7 +248,7 @@ function toggleBox() {
       <p>{{ lab?.nome }}. Todos os direitos reservados.</p>
       <a
         class="button-topo"
-        href="#hero"
+        href="#heroTwo"
       >
         voltar ao topo
       </a>

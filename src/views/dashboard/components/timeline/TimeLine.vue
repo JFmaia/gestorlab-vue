@@ -69,11 +69,15 @@ function changePageSiteLab(){
           :summary="item.sobre"
         />
       </ul>
-      <div class="info">
+      <div
+        v-show="listLaboratorys.length === 0"
+        class="info"
+      >
         <h3>Nenhum laboratório disponivel!</h3>
       </div>
     </section>
     <div
+      v-show="listLaboratorys.length !== 0"
       class="divider"
     />
   </div>
