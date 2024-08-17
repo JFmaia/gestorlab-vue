@@ -42,7 +42,6 @@ onMounted(async () => {
   userLocal.value = user.getUser;
   listPedidos.value = user.getPedidosAtivos();
   await isTag();
-  console.log(permUser.value);
 });
 
 async function receiveEvent(data: boolean){
