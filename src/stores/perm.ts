@@ -17,8 +17,8 @@ export const permStore = defineStore('perm', {
         const response: any = await API.get('/permissoes/permLab');
         const listPermissions = response.data;
         return listPermissions;
-      } catch (e) {
-        return e;
+      } catch (error: any) {
+        return error.response.data.detail;
       }
     }
   }

@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { authStore } from '@/stores/auth';
 import { useLoadingStore } from '@/stores/loading';
+import { userStore } from '@/stores/user';
+import type { UsuarioResponse } from '@/types';
 
 const HomeViewVue = () => import('@/views/home/HomeView.vue');
 const SendEmail = () => import('@/views/passwordRecovery/SendMenssage.vue');
@@ -9,12 +11,27 @@ const PageAcess = () => import('@/views/pageAcess/PageAcess.vue');
 const DashBoard = () => import('@/views/dashboard/DashBoard.vue');
 const PedidosAcess = () => import('@/views/dashboard/components/PedidosAcess.vue');
 const Profile = () => import('@/views/dashboard/components/MyProfile.vue');
+const Timeline = () => import('@/views/dashboard/components/timeline/TimeLine.vue');
+const Laboratory = () => import('@/views/dashboard/components/laboratory/MyLaboratory.vue');
+const CreateLab = () => import('@/views/createLab/CreateLab.vue');
+const LandingPage = () => import('@/views/landingpage/LandingPageLab.vue');
 
 const routes = [
   {
     path: '/',
     name: 'home',
     component: HomeViewVue
+  },
+  {
+    path: '/landingpage/:id',
+    name: 'landingpage',
+    component: LandingPage,
+    props: true
+  },
+  {
+    path: '/createLab',
+    name: 'createLab',
+    component: CreateLab,
   },
   {
     path: '/pageAcess',
@@ -36,9 +53,14 @@ const routes = [
     path: '/dashboard',
     name: 'dashboard',
     component: DashBoard,
-    redirect: '/dashboard/pedidosAcess',
+    redirect: '/dashboard/timeline',
     meta: { requiresAuth: true },
     children: [
+      {
+        path: 'timeline',
+        name: 'time-line',
+        component: Timeline,
+      },
       {
         path: 'pedidosAcess',
         name: 'pedidos-acess',
@@ -48,6 +70,11 @@ const routes = [
         path: 'profile',
         name: 'profile',
         component: Profile,
+      },
+      {
+        path: 'laboratory',
+        name: 'laboratory',
+        component: Laboratory,
       },
     ]
   }
@@ -61,6 +88,19 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const auth = authStore();
   const loadingStore = useLoadingStore();
+  const user = userStore();
+  function isCoordOrNot() {
+    const usuario: UsuarioResponse = user.getUser;
+    if (usuario?.permissao?.title === 'Coordenador') {
+      if (usuario.primeiro_acesso === true) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     loadingStore.setLoading(true);
@@ -70,6 +110,13 @@ router.beforeEach(async (to, from, next) => {
     if (response === false) {
       next('/pageAcess');
       return;
+    } else {
+      if (isCoordOrNot()) {
+        next('/createLab');
+        return;
+      } else {
+        next();
+      }
     }
   }
   next();

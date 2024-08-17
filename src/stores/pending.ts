@@ -5,10 +5,10 @@ export const pendingStore = defineStore('pending', {
   actions: {
     async releaseAcessUser(object: any, token: string) {
       try {
-        await API.post('/pendentes/pendingAccepted', {
+        await API.post('pendentes/pendingAccepted', {
           id: object.id,
           id_user: object.id_user,
-          list_permissoes: [object.perm]
+          id_perm: object.id_perm
         }, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -21,7 +21,7 @@ export const pendingStore = defineStore('pending', {
     },
     async getPendingInSystem() {
       try {
-        const response = await API.get('/pendentes');
+        const response = await API.get('/pendentes/ativos');
         const data = response.data;
         return data;
       } catch (e) {
