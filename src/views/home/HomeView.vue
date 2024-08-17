@@ -21,7 +21,10 @@ function handleRouter() {
     </div>
   </header>
   <main>
-    <section class="container-hero">
+    <section
+      id="hero"
+      class="container-hero"
+    >
       <div class="container hero">
         <p>
           Conheça o Gestor<strong>LAB</strong>:sua ferramenta ideal para simplificar a gestão do seu laboratório
@@ -117,9 +120,12 @@ function handleRouter() {
     >
     <div class="container rules">
       <p>Labens. Todos os direitos reservados.</p>
-      <button @click="() => { }">
+      <a
+        class="button-topo"
+        href="#hero"
+      >
         voltar ao topo
-      </button>
+      </a>
     </div>
   </footer>
 </template>
@@ -283,5 +289,14 @@ a {
   font-weight: bold;
   gap: 32px;
   box-shadow: 0px 4px 4px 0px #044FE0;
+}
+
+.button-topo{
+  padding: 10px;
+  border-radius: 10px;
+  border: 0.5px solid #fff;
+  text-transform: uppercase;
+  background-color: transparent;
+  color: #fff;
 }
 </style>
