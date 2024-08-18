@@ -59,6 +59,15 @@ function handleRouter() {
   router.push('/pageAcess');
 }
 
+function handleProfile() {
+  router.push({
+    name: 'profile',
+    params: {
+      id: userLocal.value?.id
+    }
+  });
+}
+
 function clearAcess(){
   auth.logout();
   user.clearUser();
@@ -236,7 +245,7 @@ async function getInitComponent() {
         <QItem
           class="q-item"
           clickable
-          @click="()=>{}"
+          @click="handleProfile()"
         >
           <QItemSection avatar>
             <img
