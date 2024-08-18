@@ -36,7 +36,7 @@ export function chooseListMenu(option: Number) {
       label: 'Usuários',
       icon: 'group',
       separator: true,
-      link: ''
+      link: 'usuarios'
     },
     {
       label: 'Projetos',
