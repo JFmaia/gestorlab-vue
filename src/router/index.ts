@@ -10,11 +10,12 @@ const PasswordRecovery = () => import('@/views/passwordRecovery/PasswordRecovery
 const PageAcess = () => import('@/views/pageAcess/PageAcess.vue');
 const DashBoard = () => import('@/views/dashboard/DashBoard.vue');
 const PedidosAcess = () => import('@/views/dashboard/components/PedidosAcess.vue');
-const Profile = () => import('@/views/dashboard/components/MyProfile.vue');
+const Profile = () => import('@/views/dashboard/components/profile/MyProfile.vue');
 const Timeline = () => import('@/views/dashboard/components/timeline/TimeLine.vue');
 const Laboratory = () => import('@/views/dashboard/components/laboratory/MyLaboratory.vue');
 const CreateLab = () => import('@/views/createLab/CreateLab.vue');
 const LandingPage = () => import('@/views/landingpage/LandingPageLab.vue');
+const Usuarios = () => import('@/views/dashboard/components/admin/ListUsuarios.vue');
 
 const routes = [
   {
@@ -67,9 +68,15 @@ const routes = [
         component: PedidosAcess,
       },
       {
-        path: 'profile',
+        path: 'profile/:id',
         name: 'profile',
         component: Profile,
+        props: true
+      },
+      {
+        path: 'usuarios',
+        name: 'usuarios',
+        component: Usuarios(),
       },
       {
         path: 'laboratory',
