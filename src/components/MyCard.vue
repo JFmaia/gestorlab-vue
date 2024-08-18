@@ -6,12 +6,14 @@ import {userStore} from '@/stores/user';
 import {authStore} from '@/stores/auth';
 import {permStore} from '@/stores/perm';
 import {labStore} from '@/stores/laboratory';
+import { useRouter } from 'vue-router';
 
 //state
 const user = userStore();
 const lab = labStore();
 const auth = authStore();
 const permi = permStore();
+const router = useRouter();
 // props
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps({
@@ -131,6 +133,15 @@ async function addMember() {
   }
 }
 
+function handleProfile(id:string) {
+  router.push({
+    name: 'profile',
+    params: {
+      id: id
+    }
+  });
+}
+
 </script>
 <template>
   <q-card
@@ -150,7 +161,7 @@ async function addMember() {
     />
     <q-card-section>
       <article>
-        <span>{{ summary }}</span>
+        <span class="span-article">{{ summary }}</span>
         <button @click.prevent="changeRegistration()">
           <QSpinnerDots
             size="20px"
@@ -230,11 +241,12 @@ async function addMember() {
     />
     <q-card-section>
       <article>
-        <span>{{ summary }}</span>
+        <span class="span-article">{{ summary }}</span>
       </article>
     </q-card-section>
   </q-card>
   <q-card
+    @click.prevent="handleProfile(idUser)"
     v-show="type ===3"
     dark
     bordered
@@ -250,13 +262,43 @@ async function addMember() {
       dark
     />
     <q-card-section>
-      <span>{{ summary }}</span>
+      <span class="span-article">{{ summary }}</span>
     </q-card-section>
+  </q-card>
+  <q-card
+    v-show="type === 4"
+    dark
+    bordered
+    class="my-card-member"
+  >
+    <q-card-section>
+      <article>
+        <h1>{{ title }}</h1>
+        <p>{{ subTitle }}</p>
+      </article>
+    </q-card-section>
+    <q-separator
+      dark
+    />
+    <q-card-section>
+      <span class="span-article">{{ summary }}</span>
+    </q-card-section>
+    <button @click="()=>{}">
+      <QSpinnerDots
+        size="20px"
+        color="dark"
+        v-if="loading"
+      />
+      <template v-else>
+        Aceitar o pedido
+      </template>
+    </button>
   </q-card>
 </template>
 <style scoped lang="scss">
   .my-card {
     border: 1px solid $contour;
+    cursor: pointer;
     box-shadow: 0px 4px 4px 0px $dark;
     width: 20rem;
     height: 22rem;
@@ -265,6 +307,7 @@ async function addMember() {
 
   .my-card-lab {
     border: 1px solid $contour;
+    cursor: pointer;
     box-shadow: 0px 4px 4px 0px $dark;
     width: 20rem;
     height: 14rem;
@@ -273,6 +316,7 @@ async function addMember() {
 
   .my-card-member {
     border: 1px solid $contour;
+    cursor: pointer;
     box-shadow: 0px 4px 4px 0px $dark;
     width: 20rem;
     background-color: $dark;
@@ -325,7 +369,7 @@ async function addMember() {
     color: $textDisabled;
   }
 
-  article span {
+  .span-article {
     max-width: 18rem;
     height: 6rem; 
     font-size: 0.9rem;
