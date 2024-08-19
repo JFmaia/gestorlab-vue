@@ -29,6 +29,42 @@ export const userStore = defineStore('user', {
   },
 
   actions: {
+    async deleteUser(id: string, token: string) {
+      try {
+        await API.delete(`/usuarios/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error: any) {
+        return error.response.data.detail;
+      }
+    },
+    async getAllUsuarios() {
+      try {
+        const response = await API.get('/usuarios');
+        return response.data;
+      } catch (error: any) {
+        const object = {
+          message: error.response.data.detail,
+          list: []
+        };
+        return object;
+      }
+    },
+    async getUsuario(id: string, token: string) {
+      try {
+        const response = await API.get(`/usuarios/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return response.data;
+      } catch (error: any) {
+        return error.response.data.detail;
+      }
+    },
     async updateLaboratorio(id: string, token: string) {
       const response = await API.get(`/laboratorios/${id}`, {
         headers: {

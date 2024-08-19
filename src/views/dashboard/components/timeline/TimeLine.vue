@@ -65,7 +65,7 @@ function changePageSiteLab(){
           :id-user="userData?.id"
           :id-lab="item.id"
           :title="item.nome"
-          :sub-title="item.coordenador_id"
+          :sub-title="item.coordenador.primeiro_nome"
           :summary="item.sobre"
         />
       </ul>
