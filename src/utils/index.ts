@@ -15,12 +15,6 @@ export function chooseListMenu(option: Number) {
       link: 'time-line'
     },
     {
-      label: 'Coordenadores',
-      icon: 'admin_panel_settings',
-      separator: true,
-      link: ''
-    },
-    {
       label: 'Laboratorios',
       icon: 'group_work',
       separator: true,
@@ -41,12 +35,6 @@ export function chooseListMenu(option: Number) {
     {
       label: 'Projetos',
       icon: 'dashboard',
-      separator: true,
-      link: ''
-    },
-    {
-      label: 'Colaboradores',
-      icon: 'diversity_2',
       separator: true,
       link: ''
     },
