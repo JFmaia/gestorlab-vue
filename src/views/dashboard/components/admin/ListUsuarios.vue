@@ -54,21 +54,24 @@ async function getUsuarios(){
       v-else
       class="list"
     >
-      <MyCard
+      <div
         v-show="listUsers?.length !== 0"
-        v-for="usuario in listUsers"
-        :key="usuario.id"
-        :type="3"
-        :id-user="usuario.id"
-        :title="usuario.primeiro_nome + ' ' + usuario.segundo_nome"
-        :date-create="usuario.data_inicial"
-        :summary="usuario.permissao?.title"
-      />
+      >
+        <MyCard
+          v-for="usuario in listUsers"
+          :key="usuario.id"
+          :type="3"
+          :id-user="usuario.id"
+          :title="usuario.primeiro_nome + ' ' + usuario.segundo_nome"
+          :date-create="usuario.data_inicial"
+          :summary="usuario.permissao?.title"
+        />
+      </div>
       <div
         v-show="listUsers?.length === 0"
         class="info"
       >
-        <h3>Nenhum laboratório disponivel!</h3>
+        <h3>Nenhum usuário encontrado!</h3>
       </div>
     </div>
   </div>
@@ -92,9 +95,12 @@ async function getUsuarios(){
 
   .list{
     display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
+    flex-direction: column;
     align-items: flex-start;
+  }
+  .list div {
+    display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
   }
 
@@ -108,6 +114,7 @@ async function getUsuarios(){
   
   .list-header span{
     font-size: 2rem;
+    font-weight: 700;
   }
 
   .info{
