@@ -85,8 +85,9 @@ const routes = [
         component: Laboratorios(),
       },
       {
-        path: 'laboratory',
+        path: 'laboratory/:id',
         name: 'laboratory',
+        props: true,
         component: Laboratory,
       },
     ]
