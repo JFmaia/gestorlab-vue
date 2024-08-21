@@ -271,7 +271,7 @@ async function getInitComponent() {
           >
             <router-link
               class="router-link"
-              :to="{name: menuItem.link}"
+              :to="menuItem.link === 'laboratory' ? { name: menuItem.link, params: { id: selectedLaboratory.id } } : { name: menuItem.link }"
             >
               <QItem
                 clickable
