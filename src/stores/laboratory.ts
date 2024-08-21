@@ -4,6 +4,18 @@ import type { CreateLaboratory } from '@/types';
 
 export const labStore = defineStore('lab', {
   actions: {
+    async getAllLaboratorys() {
+      try {
+        const response = await API.get('/laboratorios');
+        return response.data;
+      } catch (error: any) {
+        const object = {
+          list: [],
+          message: error.response.data.detail
+        };
+        return object;
+      }
+    },
     async getLaboratory(id: any, token: string) {
       try {
         const response = await API.get(`/laboratorios/${id}`, {
