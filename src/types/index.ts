@@ -58,6 +58,7 @@ export interface LaboratorioResponse {
   pedidos: Array<Pending> | null;
   endereco_id: string;
   endereco: Endereco;
+  coordenador: Usuario;
   check: boolean;
   image: string | null;
 }
