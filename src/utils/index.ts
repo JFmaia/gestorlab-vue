@@ -18,7 +18,7 @@ export function chooseListMenu(option: Number) {
       label: 'Laboratorios',
       icon: 'group_work',
       separator: true,
-      link: ''
+      link: 'laboratorios'
     },
     {
       label: 'Pedidos de acesso',

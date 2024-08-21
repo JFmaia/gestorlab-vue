@@ -16,6 +16,7 @@ const Laboratory = () => import('@/views/dashboard/components/laboratory/MyLabor
 const CreateLab = () => import('@/views/createLab/CreateLab.vue');
 const LandingPage = () => import('@/views/landingpage/LandingPageLab.vue');
 const Usuarios = () => import('@/views/dashboard/components/admin/ListUsuarios.vue');
+const Laboratorios = () => import('@/views/dashboard/components/admin/ListLaboratorios.vue');
 
 const routes = [
   {
@@ -77,6 +78,11 @@ const routes = [
         path: 'usuarios',
         name: 'usuarios',
         component: Usuarios(),
+      },
+      {
+        path: 'laboratorios',
+        name: 'laboratorios',
+        component: Laboratorios(),
       },
       {
         path: 'laboratory',
