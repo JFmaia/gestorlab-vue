@@ -142,6 +142,15 @@ function handleProfile(id:string) {
   });
 }
 
+function handleLaboratory(id:string) {
+  router.push({
+    name: 'laboratory',
+    params: {
+      id: id
+    }
+  });
+}
+
 </script>
 <template>
   <q-card
@@ -293,6 +302,26 @@ function handleProfile(id:string) {
         Aceitar o pedido
       </template>
     </button>
+  </q-card>
+  <q-card
+    @click.prevent="handleLaboratory(idLab)"
+    v-show="type ===5"
+    dark
+    bordered
+    class="my-card-member"
+  >
+    <q-card-section>
+      <article>
+        <h1>{{ title }}</h1>
+        <p>{{ dateCreate }}</p>
+      </article>
+    </q-card-section>
+    <q-separator
+      dark
+    />
+    <q-card-section>
+      <span class="span-article">{{ summary }}</span>
+    </q-card-section>
   </q-card>
 </template>
 <style scoped lang="scss">
