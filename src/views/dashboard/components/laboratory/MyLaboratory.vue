@@ -26,6 +26,7 @@ let confirmLab = ref<string>();
 let liberty = ref<boolean>(true);
 let listPedidos = ref<Array<Pending>>();
 let dialogCreateLab= ref<boolean>(false);
+let dialogEditLab= ref<boolean>(false);
 let loadingPage = ref<boolean>(false);
 const id = route.params.id;
 // Uso do watch
@@ -41,16 +42,22 @@ defineEmits(['event']);
 
 //function
 onMounted(async () => {
+  await initPageLaboratorio();
+});
+
+async function initPageLaboratorio(){
   loadingPage.value = true;
   lab.value = await labe.getLaboratory(id, auth.getToken);
   userLocal.value = user.getUser;
   listPedidos.value = user.getPedidosAtivos();
   await isTag();
   loadingPage.value = false;
-});
+}
 
 async function receiveEvent(data: boolean){
+  dialogEditLab.value = data;
   dialogCreateLab.value = data;
+  await initPageLaboratorio();
 }
 
 async function isTag(){
@@ -86,6 +93,10 @@ async function deletedLabConfirm(){
 function openDialogCreateLab(){
   dialogCreateLab.value = true;
 }
+
+function openDialogEditLab(){
+  dialogEditLab.value = true;
+}
 </script>
 <template>
   <div
@@ -110,13 +121,23 @@ function openDialogCreateLab(){
         Crie seu Laboratório
       </button>
       <q-dialog v-model="dialogCreateLab">
-        <ModalCreateLab @event="receiveEvent" />
+        <ModalCreateLab
+          :tipo="1"
+          @event="receiveEvent"
+        />
       </q-dialog>
     </div>
     <div
       class="lab-container"
       v-else
     >
+      <q-dialog v-model="dialogEditLab">
+        <ModalCreateLab
+          :tipo="2"
+          :laboratorio="lab"
+          @event="receiveEvent"
+        />
+      </q-dialog>
       <section class="profile-lab">
         <div class="box-profile">
           <img
@@ -136,7 +157,7 @@ function openDialogCreateLab(){
               {{ lab?.membros?.length }}
             </span>
           </div>
-          <button @click="()=>{}">
+          <button @click="openDialogEditLab()">
             Editar o laboratório
           </button>
         </div>

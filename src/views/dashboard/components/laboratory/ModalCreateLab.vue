@@ -1,16 +1,26 @@
 <script setup lang="ts">
-import {ref} from 'vue';
-import type { Imagefile, CreateLaboratory } from '@/types';
+import {ref, onMounted} from 'vue';
+import type { Imagefile, CreateLaboratory, LaboratorioResponse } from '@/types';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { QCard, QCardActions, QCardSection, QBtn, QIcon, QSpinnerDots } from 'quasar';
 import { labStore } from '@/stores/laboratory';
 import { authStore } from '@/stores/auth';
-import { useRouter } from 'vue-router';
 
 const emit = defineEmits(['event']);
 
-const router = useRouter(); 
+const props = defineProps({
+  tipo:{
+    type: Number,
+    required: true
+  },
+  laboratorio:{
+    type: Object as () => LaboratorioResponse,
+    required: false,
+    default: null
+  }
+});
+ 
 const lab = labStore();
 const auth = authStore();
 
@@ -53,6 +63,93 @@ const [estado, estadoAttrs] = defineField('estado');
 const [cep, cepAttrs] = defineField('cep');
 const [pais, paisAttrs] = defineField('pais');
 
+
+onMounted(() => {
+  initDialog();
+});
+
+function initDialog(){
+  if(props.tipo === 2){
+    nome.value = props.laboratorio.nome;
+    sobre.value = props.laboratorio.sobre; 
+    template.value = props.laboratorio.template;
+    descricao.value = props.laboratorio.descricao;
+    logradouro.value = props.laboratorio.endereco.logradouro;
+    bairro.value = props.laboratorio.endereco.bairro;
+    numero.value = props.laboratorio.endereco.numero;
+    email.value = props.laboratorio.email;
+    cidade.value = props.laboratorio.endereco.cidade;
+    complemento.value = props.laboratorio.endereco.complemento;
+    cep.value = props.laboratorio.endereco.cep;
+    estado.value = props.laboratorio.endereco.estado;
+    pais.value = props.laboratorio.endereco.pais;
+  } else{
+    return;
+  }
+}
+
+async function createLab(){
+  const isValid = await validate();
+  if(isValid.valid){
+    loading.value=true;
+    if(props.tipo === 1){
+      const object: CreateLaboratory = {
+        nome:nome.value,
+        sobre:sobre.value,
+        template: template.value,
+        descricao:descricao.value,
+        email:email.value,
+        image:imageBase64.value, 
+        endereco: {
+          logradouro: logradouro.value,
+          numero:numero.value,
+          complemento:complemento.value,
+          bairro:bairro.value,
+          cidade:cidade.value,
+          estado:estado.value,
+          cep:cep.value,
+          pais:pais.value
+        }
+      };
+      const response = await lab.createLaboratorio(object, auth.getToken);
+      if(response === true){
+        emit('event', false);
+        loading.value=false;
+      }else {
+        loading.value=false;
+        alert(response);
+      }
+    }else {
+      const object: CreateLaboratory = {
+        nome:nome.value,
+        sobre:sobre.value,
+        template: template.value,
+        descricao:descricao.value,
+        email:email.value,
+        image:imageBase64.value, 
+        endereco: {
+          logradouro: logradouro.value,
+          numero:numero.value,
+          complemento:complemento.value,
+          bairro:bairro.value,
+          cidade:cidade.value,
+          estado:estado.value,
+          cep:cep.value,
+          pais:pais.value
+        }
+      };
+      const response = await lab.editLaboratorio(object, props.laboratorio.id, auth.getToken);
+      if(response === true){
+        emit('event', false);
+        loading.value=false;
+      }else {
+        loading.value=false;
+        alert(response);
+      }
+    }
+  }
+}
+
 function handleTemplate(value: boolean){
   optionTemplate.value = value;
   if(value){
@@ -62,39 +159,6 @@ function handleTemplate(value: boolean){
   }
 }
 
-async function createLab(){
-  const isValid = await validate();
-  if(isValid.valid){
-    loading.value=true;
-    const object: CreateLaboratory = {
-      nome:nome.value,
-      sobre:sobre.value,
-      template: template.value,
-      descricao:descricao.value,
-      email:email.value,
-      image:imageBase64.value, 
-      endereco: {
-        logradouro: logradouro.value,
-        numero:numero.value,
-        complemento:complemento.value,
-        bairro:bairro.value,
-        cidade:cidade.value,
-        estado:estado.value,
-        cep:cep.value,
-        pais:pais.value
-      }
-    };
-    const response = await lab.createLaboratorio(object, auth.getToken);
-    if(response === true){
-      router.push('/pageAcess');
-      emit('event', false);
-      loading.value=false;
-    }else {
-      loading.value=false;
-      alert(response);
-    }
-  }
-}
 function onImageChange(event: Event) {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
@@ -318,11 +382,16 @@ function onImageChange(event: Event) {
       >
         <QSpinnerDots
           v-if="loading"
-          color="dark"
+          color="primary"
           size="1rem"
         />
         <template v-else>
-          Criar Laboratório
+          <template v-if="props.tipo === 1">
+            Criar Laboratório
+          </template>
+          <template v-if="props.tipo === 2">
+            Editar Laboratório
+          </template>
         </template>
       </q-btn>
     </q-card-actions>
