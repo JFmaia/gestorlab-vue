@@ -207,6 +207,20 @@ export const userStore = defineStore('user', {
         return error;
       }
     },
+    async editUsuario(usuario: any, id: string, token: string) {
+      try {
+        await API.put(`/usuarios/${id}`, {
+          ...usuario
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error) {
+        return error;
+      }
+    },
     clearUser() {
       // Remover os itens do localStorage
       localStorage.removeItem('user');
