@@ -48,6 +48,28 @@ export const labStore = defineStore('lab', {
         return error;
       }
     },
+    async editLaboratorio(lab: CreateLaboratory, id: string, token: string) {
+      try {
+        await API.put(`/laboratorios/${id}`, {
+          nome: lab.nome,
+          sobre: lab.sobre,
+          template: lab.template,
+          descricao: lab.descricao,
+          email: lab.email,
+          image: lab.image,
+          endereco: {
+            ...lab.endereco
+          }
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error: any) {
+        return error.response.data.detail;
+      }
+    },
     async createLaboratorio(lab: CreateLaboratory, token: string) {
       try {
         await API.post('/laboratorios', {
