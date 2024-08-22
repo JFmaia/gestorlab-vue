@@ -405,9 +405,9 @@ function handleLaboratory(id:string) {
     font-weight: 500;
     font-style: italic;
     color: $textColor; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
-    white-space: normal; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
   }
 
   button {
