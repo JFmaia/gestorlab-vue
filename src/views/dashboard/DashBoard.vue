@@ -91,12 +91,17 @@ async function handlePermLab(value: any, id_user: string){
   }
 }
 
-function changeId(name: string){
-  switch (name) {
-  case ('laboratorios'):
-    return selectedLaboratory.value.id;
-  case ('laboratory'):
-    return selectedLaboratory.value.id;
+function changeId(name: string) {
+  if (selectedLaboratory.value) {
+    switch (name) {
+    case 'laboratorios':
+    case 'laboratory':
+      return selectedLaboratory.value.id;
+    default:
+      return null;
+    }
+  } else {
+    return null;
   }
 }
 
