@@ -9,13 +9,6 @@ export function removerCaracter(texto: any) {
 export function chooseListMenu(option: Number) {
   const menuAdmin = [
     {
-      label: 'Linha do tempo',
-      icon: 'view_timeline',
-      value: 0,
-      separator: true,
-      link: 'time-line'
-    },
-    {
       label: 'Laboratorios',
       value: 1,
       icon: 'group_work',
@@ -37,11 +30,10 @@ export function chooseListMenu(option: Number) {
       link: 'usuarios'
     },
     {
-      value: 1,
       label: 'Projetos',
       icon: 'dashboard',
       separator: true,
-      link: ''
+      link: 'admin-projetos'
     },
   ];
 
