@@ -83,6 +83,36 @@ export const projetoStore = defineStore('projeto', {
         };
         return object;
       }
+    },
+    async getListAllProjetos(token: string) {
+      try {
+        const response = await API.get('/projetos', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data: Array<ProjetoResponse> = response.data;
+        if (data.length === 0) {
+          const object = {
+            listProject: [],
+            message: ''
+          };
+          return object;
+        } else {
+          const object = {
+            listProject: data,
+            message: ''
+          };
+          return object;
+        }
+
+      } catch (e: any) {
+        const object = {
+          listProject: [],
+          message: e.response.data.detail
+        };
+        return object;
+      }
     }
   }
 });
