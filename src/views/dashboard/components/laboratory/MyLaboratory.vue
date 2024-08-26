@@ -189,29 +189,6 @@ function openDialogEditLab(){
           class="divider"
         />
         <div>
-          <h2>Membros</h2>
-          <article
-            class="info-empty"
-            v-if="lab?.membros?.length === 0"
-          >
-            <h3>Não a nenhum membro no laboratório!</h3>
-          </article>
-          <ul v-else>
-            <MyCard
-              v-for="member in lab?.membros"
-              :key="member.id ?? ''"
-              :type="3"
-              :summary="permUser"
-              :id-user="member.id ?? ''"
-              :title="`${member.primeiro_nome}` + ' ' + `${member.segundo_nome}`" 
-              :date-create="member.data_inicial ?? ''"
-            />
-          </ul>
-        </div>
-        <q-separator
-          class="divider"
-        />
-        <div>
           <h2>Projetos</h2>
           <article
             class="info-empty"
