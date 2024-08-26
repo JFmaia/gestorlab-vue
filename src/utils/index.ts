@@ -57,7 +57,7 @@ export function chooseListMenu(option: Number) {
       label: 'Membros',
       icon: 'group',
       separator: true,
-      link: ''
+      link: 'membros'
     },
     {
       label: 'Projetos',
