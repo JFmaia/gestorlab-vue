@@ -18,6 +18,7 @@ const LandingPage = () => import('@/views/landingpage/LandingPageLab.vue');
 const Usuarios = () => import('@/views/dashboard/components/admin/ListUsuarios.vue');
 const Laboratorios = () => import('@/views/dashboard/components/admin/ListLaboratorios.vue');
 const ListProjetos = () => import('@/views/dashboard/components/projeto/ListProjetos.vue');
+const ListMembros = () => import('@/views/dashboard/components/membros/MembrosPage.vue');
 const ListProjetosAdmin = () => import('@/views/dashboard/components/admin/ListProjetos.vue');
 
 const routes = [
@@ -86,6 +87,12 @@ const routes = [
         path: 'projetos',
         name: 'projetos',
         component: ListProjetos(),
+        props: true
+      },
+      {
+        path: 'membros',
+        name: 'membros',
+        component: ListMembros(),
         props: true
       },
       {
