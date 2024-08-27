@@ -131,6 +131,18 @@ export const labStore = defineStore('lab', {
       } catch (error: any) {
         return error.response.data.detail;
       }
+    },
+    async deleteMember(idLab: string, idMember: String, token: string) {
+      try {
+        await API.delete(`/laboratorios/removeMember/${idLab}/${idMember}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error: any) {
+        return error.response.data.detail;
+      }
     }
   }
 });
