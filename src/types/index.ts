@@ -75,6 +75,7 @@ export interface Laboratorio {
   data_up: string;
   endereco_id: string;
   coordenador: Usuario;
+  permissoes: Array<PermissionLab> | null;
   endereco: Endereco | null;
   image: string | null;
 }

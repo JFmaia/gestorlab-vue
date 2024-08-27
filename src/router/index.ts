@@ -17,6 +17,9 @@ const CreateLab = () => import('@/views/createLab/CreateLab.vue');
 const LandingPage = () => import('@/views/landingpage/LandingPageLab.vue');
 const Usuarios = () => import('@/views/dashboard/components/admin/ListUsuarios.vue');
 const Laboratorios = () => import('@/views/dashboard/components/admin/ListLaboratorios.vue');
+const ListProjetos = () => import('@/views/dashboard/components/projeto/ListProjetos.vue');
+const ListMembros = () => import('@/views/dashboard/components/membros/MembrosPage.vue');
+const ListProjetosAdmin = () => import('@/views/dashboard/components/admin/ListProjetos.vue');
 
 const routes = [
   {
@@ -75,6 +78,24 @@ const routes = [
         props: true
       },
       {
+        path: '/adminProjetos',
+        name: 'admin-projetos',
+        component: ListProjetosAdmin(),
+        props: true
+      },
+      {
+        path: 'projetos',
+        name: 'projetos',
+        component: ListProjetos(),
+        props: true
+      },
+      {
+        path: 'membros',
+        name: 'membros',
+        component: ListMembros(),
+        props: true
+      },
+      {
         path: 'usuarios',
         name: 'usuarios',
         component: Usuarios(),
@@ -85,8 +106,9 @@ const routes = [
         component: Laboratorios(),
       },
       {
-        path: 'laboratory',
+        path: 'laboratory/:id',
         name: 'laboratory',
+        props: true,
         component: Laboratory,
       },
     ]

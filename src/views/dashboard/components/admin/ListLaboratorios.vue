@@ -60,7 +60,7 @@ async function getLaboratory(){
         <MyCard
           v-for="labe in listLaboratory"
           :key="labe.id"
-          :type="3"
+          :type="5"
           :id-lab="labe.id"
           :title="labe.nome"
           :date-create="labe.data_inicial"

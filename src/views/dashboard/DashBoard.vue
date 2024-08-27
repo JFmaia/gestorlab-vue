@@ -91,6 +91,20 @@ async function handlePermLab(value: any, id_user: string){
   }
 }
 
+function changeId(name: string) {
+  if (selectedLaboratory.value) {
+    switch (name) {
+    case 'laboratorios':
+    case 'laboratory':
+      return selectedLaboratory.value.id ?? 'null';
+    default:
+      return 'null';
+    }
+  } else {
+    return 'null';
+  }
+}
+
 async function getInitComponent() {
   userLocal.value = user.getUser;
   listLaboratory.value = user.getlaboratorys;
@@ -271,7 +285,7 @@ async function getInitComponent() {
           >
             <router-link
               class="router-link"
-              :to="{name: menuItem.link}"
+              :to="menuItem.value === 1 ? { name: menuItem.link, params: { id: changeId(menuItem.link) } } : { name: menuItem.link }"
             >
               <QItem
                 clickable

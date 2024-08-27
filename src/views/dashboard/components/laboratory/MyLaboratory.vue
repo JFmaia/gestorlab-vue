@@ -3,15 +3,16 @@ import {userStore} from '@/stores/user';
 import {permStore} from '@/stores/perm';
 import {labStore} from '@/stores/laboratory';
 import {authStore} from '@/stores/auth';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import {ref, onMounted, watch} from 'vue';
-import { QIcon, QDialog, QSeparator, QCard, QCardActions, QCardSection, QBtn } from 'quasar';
+import { QIcon, QDialog, QSeparator, QCard, QCardActions, QCardSection, QBtn, QSpinnerDots } from 'quasar';
 import type { Pending,  LaboratorioResponse,  PermissionOfLab,  UsuarioResponse } from '@/types';
 import MyCard from '@/components/MyCard.vue';
 import ModalCreateLab from '@/views/dashboard/components/laboratory/ModalCreateLab.vue';
 
 // State
 const router = useRouter();
+const route = useRoute();
 const user = userStore();
 const perm = permStore();
 const labe = labStore();
@@ -25,6 +26,9 @@ let confirmLab = ref<string>();
 let liberty = ref<boolean>(true);
 let listPedidos = ref<Array<Pending>>();
 let dialogCreateLab= ref<boolean>(false);
+let dialogEditLab= ref<boolean>(false);
+let loadingPage = ref<boolean>(false);
+const id = route.params.id;
 // Uso do watch
 watch(confirmLab, (newValue) => {
   if(newValue === lab.value?.nome){
@@ -38,14 +42,26 @@ defineEmits(['event']);
 
 //function
 onMounted(async () => {
-  lab.value = user.getlaboratory;
+  await initPageLaboratorio();
+});
+
+async function initPageLaboratorio(){
+  loadingPage.value = true;
+  if(id === 'null'){
+    lab.value = null;
+  }else {
+    lab.value = await labe.getLaboratory(id, auth.getToken);
+  }
   userLocal.value = user.getUser;
   listPedidos.value = user.getPedidosAtivos();
   await isTag();
-});
+  loadingPage.value = false;
+}
 
 async function receiveEvent(data: boolean){
+  dialogEditLab.value = data;
   dialogCreateLab.value = data;
+  await initPageLaboratorio();
 }
 
 async function isTag(){
@@ -81,176 +97,179 @@ async function deletedLabConfirm(){
 function openDialogCreateLab(){
   dialogCreateLab.value = true;
 }
+
+function openDialogEditLab(){
+  dialogEditLab.value = true;
+}
 </script>
 <template>
   <div
-    class="info-container"
-    v-if="lab === null"
+    class="loading"
+    v-if="loadingPage"
   >
-    <p>Você não faz parte de nenhum laboratório!</p>
-    <button
-      v-show="userLocal?.permissao?.title === 'Coordenador'"
-      @click.prevent="openDialogCreateLab()"
-    >
-      Crie seu Laboratório
-    </button>
-    <q-dialog v-model="dialogCreateLab">
-      <ModalCreateLab @event="receiveEvent" />
-    </q-dialog>
+    <QSpinnerDots
+      size="20px"
+      color="primary"
+    />
   </div>
-  <div
-    class="lab-container"
-    v-else
-  >
-    <section class="profile-lab">
-      <div class="box-profile">
-        <img
-          class="img-avatar"
-          v-if="lab && lab.image"
-          :src="`${lab?.image}`"
-          alt="Imagem do Laboratorio"
-        >
-        <div>
-          <h1>{{ lab?.nome }}</h1>
-          <p>{{ lab?.descricao }}</p>
-          <span @click="()=>{}">
-            <QIcon
-              name="groups"
-              size="1.2rem"
-            />
-            {{ lab?.membros?.length }}
-          </span>
-        </div>
-        <button @click="()=>{}">
-          Editar o laboratório
-        </button>
-      </div>
-    </section>
-    <section class="body-lab">
-      <div v-show="permUser === 'Coordenador' || permUser === 'Supervisor'">
-        <h2>Pedidos de acesso</h2>
-        <article
-          class="info-empty"
-          v-if="listPedidos?.length === 0"
-        >
-          <h3>Não a nenhum pedido de acesso para esse laboratório!</h3>
-        </article>
-        <ul v-else>
-          <MyCard
-            v-for="pedido in listPedidos"
-            :key="pedido.id ?? ''"
-            :type="1"
-            :id-pend="pedido.id ?? ''"
-            :id-user="pedido.id_user ?? ''"
-            :id-lab="pedido.id_lab ?? ''"
-            :nome-user="`${pedido.usuario?.primeiro_nome} ${pedido.usuario?.segundo_nome}`" 
-            :date-create="pedido.data_create ?? ''"
-          />
-        </ul>
-      </div>
-      <q-separator
-        v-show="permUser === 'Coordenador' || permUser === 'Supervisor'"
-        class="divider"
-      />
-      <div>
-        <h2>Membros</h2>
-        <article
-          class="info-empty"
-          v-if="lab?.membros?.length === 0"
-        >
-          <h3>Não a nenhum membro no laboratório!</h3>
-        </article>
-        <ul v-else>
-          <MyCard
-            v-for="member in lab?.membros"
-            :key="member.id ?? ''"
-            :type="3"
-            :summary="permUser"
-            :id-user="member.id ?? ''"
-            :title="`${member.primeiro_nome}` + ' ' + `${member.segundo_nome}`" 
-            :date-create="member.data_inicial ?? ''"
-          />
-        </ul>
-      </div>
-      <q-separator
-        class="divider"
-      />
-      <div>
-        <h2>Projetos</h2>
-        <article
-          class="info-empty"
-          v-if="lab?.projetos?.length === 0 || lab?.projetos?.length === null || lab?.projetos?.length === undefined"
-        >
-          <h3>Não a nenhum projeto no laboratório!</h3>
-        </article>
-        <ul v-else>
-          <MyCard
-            v-for="projeto in lab?.projetos"
-            :key="projeto.id ?? ''"
-            :type="2"
-            :id-user="projeto.autor_id ?? ''"
-            :title="projeto.titulo"
-            :id-lab="projeto.laboratorio_id ?? ''"
-            :id-projeto="projeto.id ?? ''"
-            :date-create="projeto.data_inicial ?? ''"
-          />
-        </ul>
-      </div>
-      <q-separator
-        class="divider"
-        dark
-      />
-      <div>
-        <h2>Descrição</h2>
-        <p>{{ lab?.descricao }}</p>
-      </div>
-      <q-separator
-        class="divider"
-        dark
-      />
-      <div>
-        <h2>Sobre</h2>
-        <p>{{ lab?.sobre }}</p>
-      </div>
-      <footer v-show="permUser === 'Coordenador'">
-        <button @click="deletedLab()">
-          Deletar Laboratorio
-        </button>
-      </footer>
-    </section>
-    <q-dialog v-model="isDeleted">
-      <q-card class="card-dialog">
-        <q-card-section>
-          <div class="text-h6">
-            Confirme o nome do Laboratório
-          </div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <input
-            v-model="confirmLab"
-            @keyup.enter="()=>{}"
+  <div v-else>
+    <div
+      class="info-container"
+      v-if="lab === null"
+    >
+      <p>Você não faz parte de nenhum laboratório!</p>
+      <button
+        v-show="userLocal?.permissao?.title === 'Coordenador'"
+        @click.prevent="openDialogCreateLab()"
+      >
+        Crie seu Laboratório
+      </button>
+      <q-dialog v-model="dialogCreateLab">
+        <ModalCreateLab
+          :tipo="1"
+          @event="receiveEvent"
+        />
+      </q-dialog>
+    </div>
+    <div
+      class="lab-container"
+      v-else
+    >
+      <q-dialog v-model="dialogEditLab">
+        <ModalCreateLab
+          :tipo="2"
+          :laboratorio="lab"
+          @event="receiveEvent"
+        />
+      </q-dialog>
+      <section class="profile-lab">
+        <div class="box-profile">
+          <img
+            class="img-avatar"
+            v-if="lab && lab.image"
+            :src="`${lab?.image}`"
+            alt="Imagem do Laboratorio"
           >
-        </q-card-section>
+          <div>
+            <h1>{{ lab?.nome }}</h1>
+            <p>{{ lab?.descricao }}</p>
+            <span @click="()=>{}">
+              <QIcon
+                name="groups"
+                size="1.2rem"
+              />
+              {{ lab?.membros?.length }}
+            </span>
+          </div>
+          <button @click="openDialogEditLab()">
+            Editar o laboratório
+          </button>
+        </div>
+      </section>
+      <section class="body-lab">
+        <div v-show="permUser === 'Coordenador' || permUser === 'Supervisor'">
+          <h2>Pedidos de acesso</h2>
+          <article
+            class="info-empty"
+            v-if="listPedidos?.length === 0"
+          >
+            <h3>Não a nenhum pedido de acesso para esse laboratório!</h3>
+          </article>
+          <ul v-else>
+            <MyCard
+              v-for="pedido in listPedidos"
+              :key="pedido.id ?? ''"
+              :type="7"
+              :id-pend="pedido.id ?? ''"
+              :id-user="pedido.id_user ?? ''"
+              :id-lab="pedido.id_lab ?? ''"
+              :nome-user="`${pedido.usuario?.primeiro_nome} ${pedido.usuario?.segundo_nome}`" 
+              :date-create="pedido.data_create ?? ''"
+            />
+          </ul>
+        </div>
+        <q-separator
+          v-show="permUser === 'Coordenador' || permUser === 'Supervisor'"
+          class="divider"
+        />
+        <div>
+          <h2>Projetos</h2>
+          <article
+            class="info-empty"
+            v-if="lab?.projetos?.length === 0 || lab?.projetos?.length === null || lab?.projetos?.length === undefined"
+          >
+            <h3>Não a nenhum projeto no laboratório!</h3>
+          </article>
+          <ul v-else>
+            <MyCard
+              v-for="projeto in lab?.projetos"
+              :key="projeto.id ?? ''"
+              :type="3"
+              :id-user="projeto.autor_id ?? ''"
+              :title="projeto.titulo"
+              :summary="projeto.descricao"
+              :id-lab="projeto.laboratorio_id ?? ''"
+              :id-projeto="projeto.id ?? ''"
+              :date-create="projeto.data_inicial ?? ''"
+            />
+          </ul>
+        </div>
+        <q-separator
+          class="divider"
+          dark
+        />
+        <div>
+          <h2>Descrição</h2>
+          <p>{{ lab?.descricao }}</p>
+        </div>
+        <q-separator
+          class="divider"
+          dark
+        />
+        <div>
+          <h2>Sobre</h2>
+          <p>{{ lab?.sobre }}</p>
+        </div>
+        <footer v-show="permUser === 'Coordenador'">
+          <button @click="deletedLab()">
+            Deletar Laboratorio
+          </button>
+        </footer>
+      </section>
+      <q-dialog v-model="isDeleted">
+        <q-card class="card-dialog">
+          <q-card-section>
+            <div class="text-h6">
+              Confirme o nome do Laboratório
+            </div>
+          </q-card-section>
 
-        <q-card-actions
-          align="right"
-          class="text-primary"
-        >
-          <q-btn
-            flat
-            label="Cancelar"
-            @click.prevent="isDeleted = false"
-          />
-          <q-btn
-            :disabled="liberty"
-            flat
-            label="Deletar"
-            @click.prevent="deletedLabConfirm()"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+          <q-card-section class="q-pt-none">
+            <input
+              v-model="confirmLab"
+              @keyup.enter="()=>{}"
+            >
+          </q-card-section>
+
+          <q-card-actions
+            align="right"
+            class="text-primary"
+          >
+            <q-btn
+              flat
+              label="Cancelar"
+              @click.prevent="isDeleted = false"
+            />
+            <q-btn
+              :disabled="liberty"
+              flat
+              label="Deletar"
+              @click.prevent="deletedLabConfirm()"
+            />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+    </div>
   </div>
 </template>
 <style scoped lang="scss">
@@ -265,6 +284,15 @@ function openDialogCreateLab(){
     background-color: $contour;
     height: 1px;
     width: 100%;
+  }
+
+  .loading{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
   }
 
   .card-dialog{

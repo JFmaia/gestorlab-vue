@@ -48,6 +48,28 @@ export const labStore = defineStore('lab', {
         return error;
       }
     },
+    async editLaboratorio(lab: CreateLaboratory, id: string, token: string) {
+      try {
+        await API.put(`/laboratorios/${id}`, {
+          nome: lab.nome,
+          sobre: lab.sobre,
+          template: lab.template,
+          descricao: lab.descricao,
+          email: lab.email,
+          image: lab.image,
+          endereco: {
+            ...lab.endereco
+          }
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error: any) {
+        return error.response.data.detail;
+      }
+    },
     async createLaboratorio(lab: CreateLaboratory, token: string) {
       try {
         await API.post('/laboratorios', {
@@ -81,13 +103,14 @@ export const labStore = defineStore('lab', {
             Authorization: `Bearer ${token}`,
           },
         });
+        return true;
       } catch (error: any) {
         return error.response.data.detail;
       }
     },
-    async deleteAcessLab(idPend: string, token: string) {
+    async deleteLaboratorio(id: string, token: string) {
       try {
-        await API.put(`/pendentes/deletePending/${idPend}`, {
+        await API.delete(`/laboratorios/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -96,14 +119,25 @@ export const labStore = defineStore('lab', {
       } catch (error: any) {
         return error.response.data.detail;
       }
-
     },
-    async deleteLaboratorio(id: string, token: string) {
+    async deleteMember(idLab: string, idMember: String, token: string) {
       try {
-        await API.delete(`/laboratorios/${id}`, {
+        await API.delete(`/laboratorios/removeMember/${idLab}/${idMember}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+        });
+        return true;
+      } catch (error: any) {
+        return error.response.data.detail;
+      }
+    },
+    async deactivePending(idPending: string, token: string) {
+      try {
+        await API.delete(`/pendentes/deletePending/${idPending}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
         });
         return true;
       } catch (error: any) {

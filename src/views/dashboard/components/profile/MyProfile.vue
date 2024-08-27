@@ -4,8 +4,10 @@ import {authStore} from '@/stores/auth';
 import { useRouter, useRoute } from 'vue-router';
 import {ref, onMounted} from 'vue';
 import { QSeparator, QSpinnerDots } from 'quasar';
-import type { UsuarioResponse } from '@/types';
+import type { Pending, UsuarioResponse } from '@/types';
+import {QDialog} from 'quasar';
 import MyCard from '@/components/MyCard.vue';
+import ModalEditUser from './ModalEditUser.vue';
 
 // State
 const router = useRouter();
@@ -15,17 +17,24 @@ const auth = authStore();
 //variables
 let use = ref<UsuarioResponse>();
 let isDeleted = ref<boolean>(false);
+let openModal = ref<boolean>(false);
 let loading = ref<boolean>(false);
+let listPedidos = ref<Array<Pending | null>>();
 const id= route.params.id as string;
 
 defineEmits(['event']);
 
 //function
 onMounted(async () => {
+  await initComponent();
+});
+
+async function initComponent(){
   loading.value = true;
   use.value = await user.getUsuario(id, auth.getToken);
+  getPedidosLaboratorios();
   loading.value = false;
-});
+}
 
 async function deletedUserConfirm(){
   const response = await user.deleteUser(use.value?.id ?? '', auth.getToken);
@@ -35,6 +44,20 @@ async function deletedUserConfirm(){
     isDeleted.value = false;
     alert(response);
   }
+}
+
+async function receiveEvent(data: boolean){
+  openModal.value = data;
+  await initComponent();
+}
+
+function openDialogEditUser(){
+  openModal.value = true;
+}
+
+function getPedidosLaboratorios(){
+  let listAux = use.value?.pedidos?.filter((item)=> item.id_lab !== null);
+  listPedidos.value = listAux;
 }
 </script>
 <template>
@@ -51,6 +74,13 @@ async function deletedUserConfirm(){
     v-else
     class="lab-container"
   >
+    <q-dialog v-model="openModal">
+      <ModalEditUser
+        :tipo="2"
+        :usuario="use"
+        @event="receiveEvent"
+      />
+    </q-dialog>
     <section class="profile-lab">
       <div class="box-profile">
         <img
@@ -63,7 +93,7 @@ async function deletedUserConfirm(){
           <h1>{{ use?.primeiro_nome + ' ' + use?.segundo_nome }}</h1>
           <p>{{ use?.permissao?.title }}</p>
         </div>
-        <button @click="()=>{}">
+        <button @click="openDialogEditUser()">
           Editar o usuário
         </button>
       </div>
@@ -79,15 +109,15 @@ async function deletedUserConfirm(){
         </article>
         <ul v-else>
           <MyCard
-            v-for="pedido in use?.pedidos"
-            :key="pedido.id ?? ''"
+            v-for="pedido in listPedidos"
+            :key="pedido?.id ?? ''"
             :type="4"
-            :id-pend="pedido.id ?? ''"
-            :id-user="pedido.id_user ?? ''"
-            :id-lab="pedido.id_lab ?? ''"
-            :title="pedido.laboratorio?.nome"
-            :sub-title="pedido.laboratorio?.descricao"
-            :summary="pedido.data_create ?? ''"
+            :id-pend="pedido?.id ?? ''"
+            :id-user="pedido?.id_user ?? ''"
+            :id-lab="pedido?.id_lab ?? ''"
+            :title="pedido?.laboratorio?.nome"
+            :sub-title="pedido?.data_create ?? ''"
+            :summary="pedido?.laboratorio?.descricao"
           />
         </ul>
       </div>
@@ -174,39 +204,6 @@ async function deletedUserConfirm(){
         </button>
       </footer>
     </section>
-    <!-- <q-dialog v-model="isDeleted">
-      <q-card class="card-dialog">
-        <q-card-section>
-          <div class="text-h6">
-            Confirme o nome do Laboratório
-          </div>
-        </q-card-section>
-
-        <q-card-section class="q-pt-none">
-          <input
-            v-model="confirmLab"
-            @keyup.enter="()=>{}"
-          >
-        </q-card-section>
-
-        <q-card-actions
-          align="right"
-          class="text-primary"
-        >
-          <q-btn
-            flat
-            label="Cancelar"
-            @click.prevent="isDeleted = false"
-          />
-          <q-btn
-            :disabled="liberty"
-            flat
-            label="Deletar"
-            @click.prevent="deletedUserConfirm()"
-          />
-        </q-card-actions>
-      </q-card>
-    </q-dialog> -->
   </div>
 </template>
 <style scoped lang="scss">

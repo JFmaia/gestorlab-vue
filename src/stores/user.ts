@@ -88,7 +88,7 @@ export const userStore = defineStore('user', {
     },
     async setInviteForLab(object: any) {
       try {
-        const response = await API.post('/usuarios/requestAcessLab', {
+        await API.post('/usuarios/requestAcessLab', {
           id_user: object.id_user,
           id_lab: object.id_lab,
         }, {
@@ -96,9 +96,7 @@ export const userStore = defineStore('user', {
             Authorization: `Bearer ${object.token}`,
           },
         });
-        if (response.data.status === 201) {
-          return true;
-        }
+        return true;
       } catch (error: any) {
         return error.response.data.detail;
       }
@@ -202,6 +200,20 @@ export const userStore = defineStore('user', {
           ...response.data
         };
         await pending.setPending(data);
+        return true;
+      } catch (error) {
+        return error;
+      }
+    },
+    async editUsuario(usuario: any, id: string, token: string) {
+      try {
+        await API.put(`/usuarios/${id}`, {
+          ...usuario
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         return true;
       } catch (error) {
         return error;

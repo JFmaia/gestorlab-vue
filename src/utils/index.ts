@@ -9,13 +9,8 @@ export function removerCaracter(texto: any) {
 export function chooseListMenu(option: Number) {
   const menuAdmin = [
     {
-      label: 'Linha do tempo',
-      icon: 'view_timeline',
-      separator: true,
-      link: 'time-line'
-    },
-    {
       label: 'Laboratorios',
+      value: 1,
       icon: 'group_work',
       separator: true,
       link: 'laboratorios'
@@ -23,10 +18,12 @@ export function chooseListMenu(option: Number) {
     {
       label: 'Pedidos de acesso',
       icon: 'person_add',
+      value: 0,
       separator: true,
       link: 'pedidos-acess'
     },
     {
+      value: 0,
       label: 'Usuários',
       icon: 'group',
       separator: true,
@@ -36,12 +33,13 @@ export function chooseListMenu(option: Number) {
       label: 'Projetos',
       icon: 'dashboard',
       separator: true,
-      link: ''
+      link: 'admin-projetos'
     },
   ];
 
   const menuCoordenador = [
     {
+      value: 0,
       label: 'Linha do tempo',
       icon: 'view_timeline',
       separator: true,
@@ -49,55 +47,48 @@ export function chooseListMenu(option: Number) {
     },
     {
       label: 'Laboratório',
+      value: 1,
       icon: 'group_work',
       separator: true,
       link: 'laboratory'
     },
     {
+      value: 0,
       label: 'Membros',
       icon: 'group',
       separator: true,
-      link: ''
+      link: 'membros'
     },
     {
       label: 'Projetos',
       icon: 'dashboard',
       separator: true,
-      link: ''
-    },
-    {
-      label: 'Colaboradores',
-      icon: 'diversity_2',
-      separator: true,
-      link: ''
-    },
+      link: 'projetos'
+    }
   ];
 
   const menuMember = [
     {
+      value: 0,
       label: 'Linha do tempo',
       icon: 'view_timeline',
       separator: true,
       link: 'time-line'
     },
     {
+      value: 1,
       label: 'Laboratório',
       icon: 'group_work',
       separator: true,
       link: 'laboratory'
     },
     {
+      value: 1,
       label: 'Projetos',
       icon: 'dashboard',
       separator: true,
       link: ''
-    },
-    {
-      label: 'Colaboradores',
-      icon: 'diversity_2',
-      separator: true,
-      link: ''
-    },
+    }
   ];
 
   const menuColaboradores = [
@@ -108,12 +99,14 @@ export function chooseListMenu(option: Number) {
       link: 'time-line'
     },
     {
+      value: 1,
       label: 'Laboratório',
       icon: 'group_work',
       separator: true,
       link: 'laboratory'
     },
     {
+      value: 1,
       label: 'Projetos',
       icon: 'dashboard',
       separator: true,
