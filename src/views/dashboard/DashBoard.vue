@@ -96,12 +96,12 @@ function changeId(name: string) {
     switch (name) {
     case 'laboratorios':
     case 'laboratory':
-      return selectedLaboratory.value.id;
+      return selectedLaboratory.value.id ?? 'null';
     default:
-      return null;
+      return 'null';
     }
   } else {
-    return null;
+    return 'null';
   }
 }
 
