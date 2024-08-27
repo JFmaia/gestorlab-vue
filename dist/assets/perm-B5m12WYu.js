@@ -1,0 +1,1 @@
+import{ah as t,A as e}from"./index-DQb3qgME.js";const o=t("perm",{actions:{async getPermissions(){try{return(await e.get("/permissoes")).data}catch(s){return s}},async getPermissionsLab(){try{return(await e.get("/permissoes/permLab")).data}catch(s){return s.response.data.detail}}}});export{o as p};
