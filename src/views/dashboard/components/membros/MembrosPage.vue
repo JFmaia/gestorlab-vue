@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import type { UsuarioResponse,  LaboratorioResponse, PermissionOfLab, Usuario} from '@/types';
-import { projetoStore } from '@/stores/project';
 import {authStore } from '@/stores/auth';
 import {userStore } from '@/stores/user';
 import {permStore } from '@/stores/perm';
+import { labStore } from '@/stores/laboratory';
 import {useRouter} from 'vue-router';
 import { QSpinnerDots, QCard, QCardSection, QSeparator} from 'quasar';
 import {ref, onMounted} from 'vue';
 
 // state
 const router = useRouter();
-const proj = projetoStore();
 const user = userStore();
 const auth = authStore();
 const perm = permStore();
+const lab = labStore();
 // variaveis
 let selectMember= ref<Usuario>();
 let permUser = ref<any>('');
@@ -22,6 +22,7 @@ let usuario = ref<UsuarioResponse>();
 let textSearch = ref<string>();
 let isDeleted = ref<boolean>(false);
 let loading = ref<boolean>(false);
+let loadingButton = ref<boolean>(false);
 let listMembrosLab = ref<Array<Usuario>>();
 let listPermissao = ref<Array<PermissionOfLab>>();
 
@@ -31,7 +32,8 @@ onMounted(async() => {
   loading.value = true;
   laboratory.value = user.getlaboratory;
   usuario.value = user.getUser;
-  listMembrosLab.value = laboratory.value?.membros ?? [];
+  const listAux: LaboratorioResponse = await lab.getLaboratory(laboratory.value?.id, auth.getToken);
+  listMembrosLab.value = listAux.membros ?? [];
   await isTag();
   loading.value = false;
 });
@@ -52,20 +54,23 @@ async function isTag(){
   }
 }
 
-async function deletedProject(){
-  const response = await proj.deleteProjeto(selectMember.value?.id, auth.getToken);
-  if(response){
-    router.push('/projetos');
-  } else {
-    isDeleted.value = false;
-    alert(response);
-  }
-}
-
 async function changeMember(member: Usuario){
   selectMember.value = member;
   const listAux: Array<PermissionOfLab> = await perm.getPermissionsLab();
   console.log(listAux);
+}
+
+async function deletedMember(){
+  loadingButton.value = true;
+  const response = await lab.deleteMember(laboratory.value?.id ?? '', selectMember.value?.id ?? '', auth.getToken);
+  if(response === true){
+    router.push('/dashboard/membros');
+    loading.value = false;
+  }else{
+    isDeleted.value = false;
+    loading.value = false;
+    alert('Error ao deletar membro!');
+  }
 }
 
 
@@ -122,7 +127,7 @@ async function changeMember(member: Usuario){
         v-show="listMembrosLab?.length === 0"
         class="info"
       >
-        <h3>Nenhum membro encontrado</h3>
+        <h3>Nenhum membro encontrado!</h3>
       </div>
     </div>
     <div class="divider" />
@@ -192,8 +197,15 @@ async function changeMember(member: Usuario){
           <p>{{ selectMember?.data_atualizacao }}</p>
         </div>
         <footer v-show="permUser === 'Coordenador'">
-          <button @click="deletedProject()">
-            Deletar membro
+          <button @click="deletedMember()">
+            <template v-if="!loadingButton">
+              Deletar membro
+            </template>
+            <QSpinnerDots
+              v-else
+              size="20px"
+              color="primary"
+            />
           </button>
         </footer>
       </section>
