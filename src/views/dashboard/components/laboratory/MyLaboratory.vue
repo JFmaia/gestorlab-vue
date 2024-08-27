@@ -47,7 +47,11 @@ onMounted(async () => {
 
 async function initPageLaboratorio(){
   loadingPage.value = true;
-  lab.value = await labe.getLaboratory(id, auth.getToken);
+  if(id === 'null'){
+    lab.value = null;
+  }else {
+    lab.value = await labe.getLaboratory(id, auth.getToken);
+  }
   userLocal.value = user.getUser;
   listPedidos.value = user.getPedidosAtivos();
   await isTag();
