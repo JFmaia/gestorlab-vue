@@ -152,7 +152,7 @@ function changeProjectConfig(project: ProjetoResponse){
         v-show="listProject?.length === 0"
         class="info"
       >
-        <h3>Nenhum laboratório encontrado!</h3>
+        <h3>Nenhum projeto encontrado!</h3>
       </div>
     </div>
     <button
