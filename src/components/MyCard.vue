@@ -5,11 +5,13 @@ import type {Permission} from '@/types';
 import {userStore} from '@/stores/user';
 import {authStore} from '@/stores/auth';
 import {permStore} from '@/stores/perm';
+import { projetoStore } from '@/stores/project';
 import {labStore} from '@/stores/laboratory';
 import { useRouter } from 'vue-router';
 
 //state
 const user = userStore();
+const proj = projetoStore();
 const lab = labStore();
 const auth = authStore();
 const permi = permStore();
@@ -80,6 +82,7 @@ const props = defineProps({
 
 // variables 
 let loading = ref<Boolean>(false);
+let loadingRecuse = ref<Boolean>(false);
 let listPermissao = ref<Array<Permission>>();
 let perm = ref<Permission>();
 
@@ -114,6 +117,7 @@ async function changeRegistration(){
 }
 
 async function addMember() {
+  loading.value=true;
   const object = {
     idUser: props.idUser,
     idLab: props.idLab,
@@ -121,16 +125,56 @@ async function addMember() {
   };
   const response = await lab.addMemberInLaboratorio(object, auth.getToken);
   if (response){
-    const response2 = await lab.deleteAcessLab(props.idPend, auth.getToken);
+    loading.value=false;
+    const response2 = await lab.deactivePending(props.idPend, auth.getToken);
     if(response2){
+      loading.value=false;
       await user.updateLaboratorio(props.idLab, auth.getToken);
-      alert('Usuário adicionado com sucesso!');
+      router.push('/dashboard/membros');
     }else {
+      loading.value=false;
       alert(response2);
     }
   } else {
+    loading.value=false;
     alert(response);
   }
+}
+
+async function deleteMemberProject(){
+  const response = await proj.deleteMember(props.idProjeto, props.idUser, auth.getToken);
+  if (response){
+    router.push('/dashboard/projetos');
+  } else {
+    alert(response);
+  }
+}
+
+async function deactivePedido(){
+  if(props.type === 7){
+    loadingRecuse.value=true;
+    const response = await lab.deactivePending(props.idPend, auth.getToken);
+    if (response){
+      loadingRecuse.value=false;
+      await user.updateLaboratorio(props.idLab, auth.getToken);
+    } else {
+      loadingRecuse.value=false;
+      alert(response);
+    }
+  }
+
+  if(props.type ===4){
+    loadingRecuse.value=true;
+    const response = await lab.deactivePending(props.idPend, auth.getToken);
+    if (response){
+      loadingRecuse.value=false;
+      router.push('/dashboard');
+    } else {
+      loadingRecuse.value=false;
+      alert(response);
+    }
+  }
+  
 }
 
 function handleProfile(id:string) {
@@ -292,16 +336,18 @@ function handleLaboratory(id:string) {
     <q-card-section>
       <span class="span-article">{{ summary }}</span>
     </q-card-section>
-    <button @click="()=>{}">
-      <QSpinnerDots
-        size="20px"
-        color="dark"
-        v-if="loading"
-      />
-      <template v-else>
-        Aceitar o pedido
-      </template>
-    </button>
+    <div st>
+      <button @click="deactivePedido()">
+        <QSpinnerDots
+          size="20px"
+          color="dark"
+          v-if="loading"
+        />
+        <template v-else>
+          Cancelar Pedido
+        </template>
+      </button>
+    </div>
   </q-card>
   <q-card
     @click.prevent="handleLaboratory(idLab)"
@@ -323,6 +369,95 @@ function handleLaboratory(id:string) {
       <span class="span-article">{{ summary }}</span>
     </q-card-section>
   </q-card>
+  <q-card
+    @click.prevent="handleProfile(idUser)"
+    v-show="type ===6"
+    dark
+    bordered
+    class="my-card-member-project"
+  >
+    <q-card-section>
+      <article>
+        <h1>{{ title }}</h1>
+        <p>{{ dateCreate }}</p>
+      </article>
+    </q-card-section>
+    <q-separator
+      dark
+    />
+    <q-card-section>
+      <button @click.prevent="deleteMemberProject()">
+        <QSpinnerDots
+          size="20px"
+          color="dark"
+          v-if="loadingRecuse"
+        />
+        <template v-else>
+          Deletar membro
+        </template>
+      </button>
+    </q-card-section>
+  </q-card>
+  <q-card
+    v-show="type === 7"
+    dark
+    bordered
+    class="my-card-lab"
+  >
+    <q-card-section>
+      <article>
+        {{ nomeUser }}
+      </article>
+    </q-card-section>
+
+    <q-separator
+      dark
+    />
+
+    <q-card-section class="card-section">
+      <form @submit.prevent="addMember()">
+        <div class="content-card">
+          {{ dateCreate }}
+          <select
+            id="permitions"
+            name="permitions"
+            required
+            v-model="perm"
+          >
+            <option
+              v-for="permission in listPermissao"
+              :key="permission.id"
+              :value="permission"
+            >
+              {{ permission.title }}
+            </option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button type="submit">
+            <QSpinnerDots
+              size="20px"
+              color="dark"
+              v-if="loading"
+            />
+            <template v-else>
+              Aceitar Pedido
+            </template>
+          </button>
+          <button @click.prevent="deactivePedido()">
+            <QSpinnerDots
+              size="20px"
+              color="dark"
+              v-if="loadingRecuse"
+            />
+            <template v-else>
+              Recusar Pedido
+            </template>
+          </button>
+        </div>
+      </form>
+    </q-card-section>
+  </q-card>
 </template>
 <style scoped lang="scss">
   .my-card {
@@ -340,6 +475,14 @@ function handleLaboratory(id:string) {
     box-shadow: 0px 4px 4px 0px $dark;
     width: 20rem;
     height: 14rem;
+    background-color: $dark;
+  }
+
+  .my-card-member-project {
+    border: 1px solid $contour;
+    cursor: pointer;
+    box-shadow: 0px 4px 4px 0px $dark;
+    width: 20rem;
     background-color: $dark;
   }
 

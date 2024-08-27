@@ -113,6 +113,48 @@ export const projetoStore = defineStore('projeto', {
         };
         return object;
       }
+    },
+    async editProjeto(object: any, id: string, token: string) {
+      try {
+        await API.put(`/projetos/${id}`, {
+          ...object
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error) {
+        return error;
+      }
+    },
+    async addMember(idProj: string, idUser: string, token: string) {
+      try {
+        await API.post('/projetos/addMember', {
+          idProjeto:idProj,
+          idUsuario:idUser
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error) {
+        return error;
+      }
+    },
+    async deleteMember(idProj: string, idUser: string, token: string){
+      console.log(idProj, idUser);
+      try {
+        await API.delete(`/projetos/removeMember/${idProj}/${idUser}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return true;
+      } catch (error) {
+        return error;
+      }
     }
   }
 });

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { UsuarioResponse,  LaboratorioResponse, PermissionOfLab, Usuario} from '@/types';
+import type { UsuarioResponse,  LaboratorioResponse, Permission, Usuario} from '@/types';
 import {authStore } from '@/stores/auth';
 import {userStore } from '@/stores/user';
 import {permStore } from '@/stores/perm';
@@ -24,7 +24,8 @@ let isDeleted = ref<boolean>(false);
 let loading = ref<boolean>(false);
 let loadingButton = ref<boolean>(false);
 let listMembrosLab = ref<Array<Usuario>>();
-let listPermissao = ref<Array<PermissionOfLab>>();
+let permMember = ref<Permission>();
+let listPermissao = ref<Array<Permission>>();
 
 
 // function
@@ -32,8 +33,9 @@ onMounted(async() => {
   loading.value = true;
   laboratory.value = user.getlaboratory;
   usuario.value = user.getUser;
-  const listAux: LaboratorioResponse = await lab.getLaboratory(laboratory.value?.id, auth.getToken);
-  listMembrosLab.value = listAux.membros ?? [];
+  const labe: LaboratorioResponse = await lab.getLaboratory(laboratory.value?.id, auth.getToken);
+  const listAux =labe.membros?.filter((item)=> item.id !== laboratory.value?.coordenador_id);
+  listMembrosLab.value = listAux ?? [];
   await isTag();
   loading.value = false;
 });
@@ -42,7 +44,7 @@ async function isTag(){
   if(laboratory.value?.permissoes?.length !== 0){
     const response = laboratory.value?.permissoes?.find((perm: any)=> perm.id_user === usuario.value?.id);
     if(response) {
-      const permissions: Array<PermissionOfLab> = await perm.getPermissionsLab();
+      const permissions: Array<Permission> = await perm.getPermissionsLab();
       const pemissionSelect = permissions.find((permi)=> permi.id === response.id_perm );
       permUser.value = pemissionSelect?.title;
       
@@ -56,15 +58,20 @@ async function isTag(){
 
 async function changeMember(member: Usuario){
   selectMember.value = member;
-  const listAux: Array<PermissionOfLab> = await perm.getPermissionsLab();
-  console.log(listAux);
+  listPermissao.value = await perm.getPermissionsLab();
+  console.log(listPermissao);
+  const permMemberAux = laboratory.value?.permissoes;
+  console.log(permMemberAux);
+  // permMember.value = permMemberAux?.permissao;
+  // console.log(permMember);
 }
 
 async function deletedMember(){
   loadingButton.value = true;
   const response = await lab.deleteMember(laboratory.value?.id ?? '', selectMember.value?.id ?? '', auth.getToken);
   if(response === true){
-    router.push('/dashboard/membros');
+    console.log('entrei');
+    router.push('/dashboard');
     loading.value = false;
   }else{
     isDeleted.value = false;
@@ -127,7 +134,7 @@ async function deletedMember(){
         v-show="listMembrosLab?.length === 0"
         class="info"
       >
-        <h3>Nenhum membro encontrado!</h3>
+        <h3>Nenhum membro diferente do coordenador encontrado!</h3>
       </div>
     </div>
     <div class="divider" />
@@ -157,7 +164,7 @@ async function deletedMember(){
             id="permitions"
             name="permitions"
             required
-            v-model="perm"
+            v-model="permMember"
           >
             <option
               v-for="permission in listPermissao"

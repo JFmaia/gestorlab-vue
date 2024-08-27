@@ -145,9 +145,47 @@ function onImageChange(event: Event) {
   selectedImage.value = file;
 
   const reader = new FileReader();
-  reader.onload = (event) => {
-    imageBase64.value = event.target?.result as string;
+  reader.onload = async (e) => {
+    const image = new Image();
+    image.src = e.target?.result as string;
+
+    // Espera a imagem carregar
+    await new Promise<void>((resolve) => {
+      image.onload = () => resolve();
+    });
+
+    // Configura as dimensões desejadas
+    const maxWidth = 800; // Largura máxima
+    const maxHeight = 600; // Altura máxima
+    const quality = 0.7; // Qualidade de compactação (0 a 1)
+
+    // Cria um canvas para redimensionar e compactar a imagem
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let width = image.width;
+    let height = image.height;
+
+    // Calcula as novas dimensões
+    if (width > maxWidth) {
+      height = (height * maxWidth) / width;
+      width = maxWidth;
+    }
+    if (height > maxHeight) {
+      width = (width * maxHeight) / height;
+      height = maxHeight;
+    }
+
+    // Define o tamanho do canvas
+    canvas.width = width;
+    canvas.height = height;
+    ctx?.drawImage(image, 0, 0, width, height);
+
+    // Obtém a imagem compactada como base64
+    const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+    imageBase64.value = compressedBase64;
   };
+
   reader.readAsDataURL(file);
 }
 

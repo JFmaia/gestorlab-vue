@@ -4,14 +4,13 @@ import { projetoStore } from '@/stores/project';
 import {authStore } from '@/stores/auth';
 import {userStore } from '@/stores/user';
 import {permStore } from '@/stores/perm';
-import {useRouter} from 'vue-router';
 import MyCard from '@/components/MyCard.vue';
 import { QSpinnerDots, QCard, QCardSection, QSeparator, QDialog, QIcon, QMenu, QList, QItem, QItemSection } from 'quasar';
 import ModalCreateProject from './ModalCreateProject.vue';
 import {ref, onMounted} from 'vue';
+import ModelEditProjeto from './ModelEditProjeto.vue';
 
 // state
-const router = useRouter();
 const proj = projetoStore();
 const user = userStore();
 const auth = authStore();
@@ -28,21 +27,38 @@ let textSearch = ref<string>();
 let isDeleted = ref<boolean>(false);
 let loading = ref<boolean>(false);
 let listMembrosLab = ref<Array<Usuario>>();
+let openModal = ref<boolean>(false);
+
+defineEmits(['event']);
 
 
 // function
 onMounted(async() => {
+  await initComponent();
+});
+
+async function initComponent() {
   loading.value = true;
   laboratory.value = user.getlaboratory;
   usuario.value = user.getUser;
   await getProject();
   await isTag();
   loading.value = false;
-});
+}
+
+async function receiveEventEdit(data: boolean){
+  openModal.value = data;
+  selectedProject.value = undefined;
+  await initComponent();
+}
 
 function openDialogCreateProject(){
   dialogCreateProject.value = true;
 }
+function openModalEditProject(){
+  openModal.value = true;
+}
+
 
 async function getProject(){
   const response = await proj.getAllProjetos(laboratory.value?.id, auth.getToken);
@@ -75,7 +91,19 @@ async function receiveEvent(data: boolean){
 async function deletedProject(){
   const response = await proj.deleteProjeto(selectedProject.value?.id, auth.getToken);
   if(response){
-    router.push('/projetos');
+    await initComponent();
+  } else {
+    isDeleted.value = false;
+    alert(response);
+  }
+}
+
+
+async function addMemberProjeto(id:string){
+  const response = await proj.addMember(selectedProject.value?.id ?? '', id, auth.getToken);
+  if(response){
+    await initComponent();
+    selectedProject.value = undefined;
   } else {
     isDeleted.value = false;
     alert(response);
@@ -185,12 +213,19 @@ function changeProjectConfig(project: ProjetoResponse){
               {{ selectedProject?.membros?.length }}
             </span>
           </div>
-          <button @click="()=>{}">
-            Editar o laboratório
+          <button @click="openModalEditProject()">
+            Editar o projeto
           </button>
         </div>
       </section>
       <section class="body-lab">
+        <q-dialog v-model="openModal">
+          <ModelEditProjeto
+            :tipo="2"
+            :proj="selectedProject"
+            @event="receiveEventEdit"
+          />
+        </q-dialog>
         <div
           style="display: flex; flex-direction: row; align-items: center;gap: 1rem;justify-content: space-between"
         >
@@ -232,7 +267,10 @@ function changeProjectConfig(project: ProjetoResponse){
               </q-list>
             </q-menu>
           </button>
-          <button style="padding: 0.6rem;">
+          <button
+            @click="addMemberProjeto(memberLab?.id??'')"
+            style="padding: 0.6rem;"
+          >
             Adicionar membro
           </button>
         </div>
@@ -246,14 +284,14 @@ function changeProjectConfig(project: ProjetoResponse){
             class="info-empty"
             v-if="selectedProject?.membros?.length === 0"
           >
-            <h3>Não a nenhum membro no laboratório!</h3>
+            <h3>Não a nenhum membro no Projeto!</h3>
           </article>
           <ul v-else>
             <MyCard
               v-for="member in selectedProject?.membros"
               :key="member.id ?? ''"
-              :type="3"
-              :summary="permUser"
+              :type="6"
+              :id-projeto="selectedProject?.id"
               :id-user="member.id ?? ''"
               :title="`${member.primeiro_nome}` + ' ' + `${member.segundo_nome}`" 
               :date-create="member.data_inicial ?? ''"

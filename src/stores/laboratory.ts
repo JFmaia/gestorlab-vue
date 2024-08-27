@@ -103,22 +103,10 @@ export const labStore = defineStore('lab', {
             Authorization: `Bearer ${token}`,
           },
         });
-      } catch (error: any) {
-        return error.response.data.detail;
-      }
-    },
-    async deleteAcessLab(idPend: string, token: string) {
-      try {
-        await API.put(`/pendentes/deletePending/${idPend}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
         return true;
       } catch (error: any) {
         return error.response.data.detail;
       }
-
     },
     async deleteLaboratorio(id: string, token: string) {
       try {
@@ -138,6 +126,18 @@ export const labStore = defineStore('lab', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
+        });
+        return true;
+      } catch (error: any) {
+        return error.response.data.detail;
+      }
+    },
+    async deactivePending(idPending: string, token: string) {
+      try {
+        await API.delete(`/pendentes/deletePending/${idPending}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
         });
         return true;
       } catch (error: any) {

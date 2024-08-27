@@ -179,7 +179,7 @@ function openDialogEditLab(){
             <MyCard
               v-for="pedido in listPedidos"
               :key="pedido.id ?? ''"
-              :type="1"
+              :type="7"
               :id-pend="pedido.id ?? ''"
               :id-user="pedido.id_user ?? ''"
               :id-lab="pedido.id_lab ?? ''"
@@ -204,9 +204,10 @@ function openDialogEditLab(){
             <MyCard
               v-for="projeto in lab?.projetos"
               :key="projeto.id ?? ''"
-              :type="2"
+              :type="3"
               :id-user="projeto.autor_id ?? ''"
               :title="projeto.titulo"
+              :summary="projeto.descricao"
               :id-lab="projeto.laboratorio_id ?? ''"
               :id-projeto="projeto.id ?? ''"
               :date-create="projeto.data_inicial ?? ''"

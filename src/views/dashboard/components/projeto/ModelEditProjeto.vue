@@ -1,27 +1,32 @@
 <script setup lang="ts">
-import {ref} from 'vue';
-import type { Imagefile} from '@/types';
+import {ref, onMounted} from 'vue';
+import type { Imagefile, ProjetoResponse } from '@/types';
 import { useForm } from 'vee-validate';
 import * as yup from 'yup';
 import { QCard, QCardActions, QCardSection, QBtn, QIcon, QSpinnerDots } from 'quasar';
-import { projetoStore } from '@/stores/project';
 import { authStore } from '@/stores/auth';
-import { useRouter } from 'vue-router';
+import { projetoStore } from '@/stores/project';
+
 
 const emit = defineEmits(['event']);
 
 const props = defineProps({
-  idLab:{
-    type: String,
-    required: true,
+  tipo:{
+    type: Number,
+    required: true
+  },
+  proj:{
+    type: Object as () => ProjetoResponse,
+    required: false,
+    default: null
   }
 });
-
-const router = useRouter(); 
-const proj = projetoStore();
+ 
+const project = projetoStore();
 const auth = authStore();
 
 let loading = ref<Boolean>(false);
+let loadingButton = ref<Boolean>(false);
 let selectedImage = ref<Imagefile | null>(null);
 let imageBase64 = ref<string | null>(null);
 let fileInput = ref<HTMLInputElement | null>(null); 
@@ -29,8 +34,8 @@ let fileInput = ref<HTMLInputElement | null>(null);
 //Validator
 const { errors, validate, defineField} = useForm({
   validationSchema: yup.object({
-    titulo: yup.string().required('O titulo é obrigatorio!'),
-    descricao: yup.string().required('Por favor descreva um pouco o seu projeto!'),
+    titulo: yup.string().required('Por favor digite seu primeiro nome!'),
+    descricao: yup.string().required('Por favor digite seu segundo nome!')
   }),
 });
 
@@ -38,27 +43,41 @@ const [titulo, tituloAttrs] = defineField('titulo');
 const [descricao, descricaoAttrs] = defineField('descricao');
 
 
-async function createProject(){
+onMounted(async () => {
+  await initDialog();
+});
+
+async function initDialog(){
+  loading.value = true;
+  if(props.tipo === 2){
+    titulo.value = props.proj.titulo;
+    descricao.value = props.proj.descricao; 
+  } else{
+    return;
+  }
+  loading.value = false;
+}
+
+async function editProject(){
   const isValid = await validate();
   if(isValid.valid){
-    loading.value=true;
-    const object = {
-      titulo: titulo.value,
-      descricao: descricao.value,
-      image: imageBase64.value,
-      id: props.idLab
+    loadingButton.value=true;
+    const object: any = {
+      titulo:titulo.value,
+      image:imageBase64.value, 
+      descricao: descricao.value
     };
-    const response = await proj.createProjeto(object, auth.getToken);
+    const response = await project.editProjeto(object, props.proj.id, auth.getToken);
     if(response === true){
-      router.push('/dashboard/projetos');
       emit('event', false);
-      loading.value=false;
+      loadingButton.value=false;
     }else {
-      loading.value=false;
+      loadingButton.value=false;
       alert(response);
     }
   }
 }
+
 function onImageChange(event: Event) {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
@@ -114,79 +133,91 @@ function onImageChange(event: Event) {
 </script>
 <template>
   <q-card class="card-create-dialog">
-    <q-card-section>
-      <h3>
-        Crie um projeto
-      </h3>
-    </q-card-section>
-    <q-card-section class="section-body">
-      <button
-        @click="fileInput?.click()"
-        class="button-img"
-      >
-        <QIcon
-          v-if="imageBase64 === null"
-          name="add_a_photo"
-          size="4rem"
-          color="white"
-          alt="Imagem para escolher"
-        />
-        <img
-          v-else
-          :src="imageBase64"
-          alt="Imagem que foi escolhida"
-        >
-        <input 
-          ref="fileInput" 
-          type="file" 
-          style="display: none;" 
-          @change="onImageChange" 
-        >
-      </button>
-      <div class="content">
-        <label>Projeto:</label>
-        <input
-          v-model="titulo"
-          v-bind="tituloAttrs"
-          type="text"
-          placeholder="digite aqui o nome do seu projeto"
-        >
-        <pre>{{ errors.titulo }}</pre>
-      </div>
-      <div class="content">
-        <label>Descrição:</label>
-        <textarea
-          v-model="descricao"
-          v-bind="descricaoAttrs"
-          type="text"
-          placeholder="Descreva seu projeto!"
-        />
-        <pre>{{ errors.descricao }}</pre>
-      </div>
-    </q-card-section>
-    <q-card-actions
-      align="right"
-      class="text-primary"
+    <div
+      v-if="loading"
+      class="info"
     >
-      <q-btn
-        flat
-        label="Cancelar"
-        @click.prevent="emit('event', false)"
+      <QSpinnerDots
+        size="20px"
+        color="primary"
       />
-      <q-btn
-        flat
-        @click.prevent="createProject()"
+    </div>
+    <template v-else>
+      <q-card-section>
+        <h3>
+          Edite os dados
+        </h3>
+      </q-card-section>
+      <q-card-section class="section-body">
+        <button
+          @click="fileInput?.click()"
+          class="button-img"
+        >
+          <QIcon
+            v-if="imageBase64 === null"
+            name="add_a_photo"
+            size="4rem"
+            color="white"
+            alt="Imagem para escolher"
+          />
+          <img
+            v-else
+            :src="imageBase64"
+            alt="Imagem que foi escolhida"
+          >
+          <input 
+            ref="fileInput" 
+            type="file" 
+            style="display: none;" 
+            @change="onImageChange" 
+          >
+        </button>
+        <div class="content">
+          <label>Título:</label>
+          <input
+            v-model="titulo"
+            v-bind="tituloAttrs"
+            type="text"
+            placeholder="Digite o titulo do seu projeto"
+          >
+          <pre>{{ errors.titulo }}</pre>
+        </div>
+        <div class="content">
+          <label>Descrição:</label>
+          <textarea
+            v-model="descricao"
+            v-bind="descricaoAttrs"
+            minlength="3"
+            type="text"
+            placeholder="Digite aqui o seu segundo nome"
+          />
+          <pre>{{ errors.descricao }}</pre>
+        </div>
+      </q-card-section>
+      <q-card-actions
+        align="right"
+        class="text-primary"
       >
-        <QSpinnerDots
-          v-if="loading"
-          color="dark"
-          size="1rem"
+        <q-btn
+          flat
+          label="Cancelar"
+          @click.prevent="emit('event', false)"
         />
-        <template v-else>
-          Criar Projeto
-        </template>
-      </q-btn>
-    </q-card-actions>
+        <q-btn
+          flat
+          @click.prevent="editProject()"
+        >
+          <QSpinnerDots
+            v-if="loadingButton"
+            color="primary"
+            size="1rem"
+          />
+          <template v-else>
+            Editar Projeto
+          </template>
+        </q-btn>
+      </q-card-actions>
+    </template>
   </q-card>
 </template>
 <style scoped lang="scss">
@@ -220,6 +251,15 @@ function onImageChange(event: Event) {
   span{
     font-size: 1.2rem;
     font-weight: 700;
+  }
+
+  .info{
+    width:100%;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    height: 1000px;
   }
   
  .card-create-dialog{
