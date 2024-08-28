@@ -95,7 +95,8 @@ async function getInitComponent() {
   userLocal.value = user.getUser;
   listLaboratory.value = user.getlaboratorys;
   selectedLaboratory.value = user.getlaboratory;
-  
+  console.log('LABORATORIO:', selectedLaboratory.value);
+  console.log('LABORATORIOs:', listLaboratory.value);
   if (userLocal.value.permissao.title === 'Admin'){
     openForPermition.value = 2;
     listMenu.value = chooseListMenu(openForPermition.value);
@@ -271,7 +272,7 @@ async function getInitComponent() {
           >
             <router-link
               class="router-link"
-              :to="menuItem.link === 'laboratory' ?{ name: menuItem.link, params: { id:selectedLaboratory.id ?? 'true' } } : { name: menuItem.link }"
+              :to="menuItem.link === 'laboratory' ? { name: menuItem.link, params: { id:selectedLaboratory === null ? 'true' : selectedLaboratory.id ?? 'true' } } : { name: menuItem.link }"
             >
               <QItem
                 clickable

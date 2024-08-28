@@ -99,12 +99,10 @@ async function getPermissoes(){
 }
 
 async function editLaboratory(){
-  console.log(props.usuario);
   const isValid = await validate();
   if(isValid.valid){
     loadingButton.value=true;
     if(user.getUser.permissao?.title === 'Admin'){
-      console.log('entrei aqui');
       const object: any = {
         email:email.value,
         image:imageBase64.value, 
@@ -116,7 +114,6 @@ async function editLaboratory(){
         id_genero: idGenero.value,
         data_nascimento: dataNascimento.value,
       };
-      console.log('cheguei aqui');
       const response = await user.editUsuario(object, props.usuario.id, auth.getToken);
       if(response === true){
         emit('event', false);
@@ -126,7 +123,7 @@ async function editLaboratory(){
         alert(response);
       }
     }else {
-      console.log('entrei');
+      ('entrei');
       const object: any = {
         email:email.value,
         image:imageBase64.value, 
@@ -137,7 +134,6 @@ async function editLaboratory(){
         id_genero: idGenero.value,
         data_nascimento: dataNascimento.value,
       };
-      console.log('cheguei aqui');
       const response = await user.editUsuario(object, props.usuario.id, auth.getToken);
       if(response === true){
         emit('event', false);

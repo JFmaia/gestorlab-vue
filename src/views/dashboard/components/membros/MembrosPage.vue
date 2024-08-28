@@ -59,9 +59,8 @@ async function isTag(){
 async function changeMember(member: Usuario){
   selectMember.value = member;
   listPermissao.value = await perm.getPermissionsLab();
-  console.log(listPermissao);
-  const permMemberAux = laboratory.value?.permissoes;
-  console.log(permMemberAux);
+  // const permMemberAux = laboratory.value?.permissoes;
+  // console.log(permMemberAux);
   // permMember.value = permMemberAux?.permissao;
   // console.log(permMember);
 }

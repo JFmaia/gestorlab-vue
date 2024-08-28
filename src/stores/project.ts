@@ -144,7 +144,6 @@ export const projetoStore = defineStore('projeto', {
       }
     },
     async deleteMember(idProj: string, idUser: string, token: string){
-      console.log(idProj, idUser);
       try {
         await API.delete(`/projetos/removeMember/${idProj}/${idUser}`, {
           headers: {
