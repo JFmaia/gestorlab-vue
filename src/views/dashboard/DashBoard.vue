@@ -96,12 +96,12 @@ function changeId(name: string) {
     switch (name) {
     case 'laboratorios':
     case 'laboratory':
-      return selectedLaboratory.value.id ?? 'null';
+      return selectedLaboratory.value.id ?? 'true';
     default:
-      return 'null';
+      return 'true';
     }
   } else {
-    return 'null';
+    return 'true';
   }
 }
 
@@ -285,7 +285,7 @@ async function getInitComponent() {
           >
             <router-link
               class="router-link"
-              :to="menuItem.value === 1 ? { name: menuItem.link, params: { id: changeId(menuItem.link) } } : { name: menuItem.link }"
+              :to="menuItem.link === 'laboratory' ?{ name: menuItem.link, params: { id:selectedLaboratory.id ?? 'true' } } : { name: menuItem.link }"
             >
               <QItem
                 clickable

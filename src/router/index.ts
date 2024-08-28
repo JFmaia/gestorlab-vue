@@ -80,30 +80,30 @@ const routes = [
       {
         path: '/adminProjetos',
         name: 'admin-projetos',
-        component: ListProjetosAdmin(),
+        component: ListProjetosAdmin,
         props: true
       },
       {
         path: 'projetos',
         name: 'projetos',
-        component: ListProjetos(),
+        component: ListProjetos,
         props: true
       },
       {
         path: 'membros',
         name: 'membros',
-        component: ListMembros(),
+        component: ListMembros,
         props: true
       },
       {
         path: 'usuarios',
         name: 'usuarios',
-        component: Usuarios(),
+        component: Usuarios,
       },
       {
         path: 'laboratorios',
         name: 'laboratorios',
-        component: Laboratorios(),
+        component: Laboratorios,
       },
       {
         path: 'laboratory/:id',

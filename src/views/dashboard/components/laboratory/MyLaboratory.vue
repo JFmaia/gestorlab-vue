@@ -47,7 +47,7 @@ onMounted(async () => {
 
 async function initPageLaboratorio(){
   loadingPage.value = true;
-  if(id === 'null'){
+  if(id === 'true'){
     lab.value = null;
   }else {
     lab.value = await labe.getLaboratory(id, auth.getToken);
