@@ -91,20 +91,6 @@ async function handlePermLab(value: any, id_user: string){
   }
 }
 
-function changeId(name: string) {
-  if (selectedLaboratory.value) {
-    switch (name) {
-    case 'laboratorios':
-    case 'laboratory':
-      return selectedLaboratory.value.id ?? 'true';
-    default:
-      return 'true';
-    }
-  } else {
-    return 'true';
-  }
-}
-
 async function getInitComponent() {
   userLocal.value = user.getUser;
   listLaboratory.value = user.getlaboratorys;
